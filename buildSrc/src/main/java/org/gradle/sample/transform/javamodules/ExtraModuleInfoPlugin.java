@@ -39,7 +39,7 @@ public class ExtraModuleInfoPlugin implements Plugin<Project> {
                 p.setAutomaticModules(extension.getAutomaticModules());
             });
             t.getFrom().attribute(artifactType, "jar").attribute(javaModule, false);
-            t.getTo().attribute(artifactType, "jar").attribute(javaModule, true);
+            t.getTo().attribute(artifactType, "jar").attribute(javaModule, true); // for debug change to true
         });
     }
 

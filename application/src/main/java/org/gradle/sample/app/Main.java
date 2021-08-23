@@ -1,5 +1,6 @@
 package org.gradle.sample.app;
 
+import com.earthtoernie.usb.UsbUtils;
 import com.google.gson.Gson;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.cli.CommandLine;
@@ -12,37 +13,38 @@ import org.gradle.sample.app.data.Message;
 public class Main {
 
     public static void main(String[] args) throws Exception {
+        UsbUtils usbUtils = new UsbUtils();
 
-        System.out.println("ARGS:");
-        System.out.println(args);
-        System.out.println(args[0]);
-        System.out.println(args[1]);
-        System.out.println(args[2]);
-
-        Options options = new Options();
-        options.addOption("json", true, "data to parse");
-        options.addOption("debug", false, "prints module infos");
-        CommandLineParser parser = new DefaultParser();
-        CommandLine cmd = parser.parse(options, args);
-
-        System.out.println("OPTIONS:");
-        System.out.println(options);
-
-        if (cmd.hasOption("debug")) {
-            printModuleDebug(Main.class);
-            printModuleDebug(Gson.class);
-            printModuleDebug(StringUtils.class);
-            printModuleDebug(CommandLine.class);
-            printModuleDebug(BeanUtils.class);
-        }
-
-        String json = cmd.getOptionValue("json");
-        Message message = new Gson().fromJson(json == null ? "{}" : json, Message.class);
-
-        Object copy = BeanUtils.cloneBean(message);
-        System.out.println();
-        System.out.println("Original: " + copy.toString());
-        System.out.println("Copy:     " + copy.toString());
+//        System.out.println("ARGS:");
+//        System.out.println(args);
+//        System.out.println(args[0]);
+//        System.out.println(args[1]);
+//        System.out.println(args[2]);
+//
+//        Options options = new Options();
+//        options.addOption("json", true, "data to parse");
+//        options.addOption("debug", false, "prints module infos");
+//        CommandLineParser parser = new DefaultParser();
+//        CommandLine cmd = parser.parse(options, args);
+//
+//        System.out.println("OPTIONS:");
+//        System.out.println(options);
+//
+//        if (cmd.hasOption("debug")) {
+//            printModuleDebug(Main.class);
+//            printModuleDebug(Gson.class);
+//            printModuleDebug(StringUtils.class);
+//            printModuleDebug(CommandLine.class);
+//            printModuleDebug(BeanUtils.class);
+//        }
+//
+//        String json = cmd.getOptionValue("json");
+//        Message message = new Gson().fromJson(json == null ? "{}" : json, Message.class);
+//
+//        Object copy = BeanUtils.cloneBean(message);
+//        System.out.println();
+//        System.out.println("Original: " + copy.toString());
+//        System.out.println("Copy:     " + copy.toString());
 
     }
 

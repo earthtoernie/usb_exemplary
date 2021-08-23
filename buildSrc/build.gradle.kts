@@ -1,4 +1,5 @@
 plugins {
+    `kotlin-dsl` // used for the convntions plugin
     `java-gradle-plugin` // so we can assign and ID to our plugin
 }
 

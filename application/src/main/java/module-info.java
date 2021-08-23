@@ -6,4 +6,5 @@ module org.gradle.sample.app {
     requires org.apache.commons.lang3;
     requires org.apache.commons.cli;
     requires org.apache.commons.beanutils;
+    requires usb_middle;
 }

@@ -5,7 +5,7 @@ list/build/
 utilities/build/
 usb/build/
 buildSrc/build/
-utilities/build/
+usbMiddle/build/
 usbdb/build/
 gui/build/
 *.db

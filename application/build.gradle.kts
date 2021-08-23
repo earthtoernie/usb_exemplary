@@ -1,5 +1,6 @@
 plugins {
     application
+    id("myproject.java-conventions") // for common libs
     id("extra-java-module-info") // apply my own plugin written in buildSrc
 }
 
@@ -29,9 +30,19 @@ extraJavaModuleInfo {
     }
     module("commons-collections-3.2.2.jar", "org.apache.commons.collections", "3.2.2")
     automaticModule("commons-logging-1.2.jar", "org.apache.commons.logging")
+
+    module("usb-api-1.0.2.jar", "javax.usb", "1.0.2"){
+        exports("javax.usb")
+    }
+}
+
+java {
+    modularity.inferModulePath.set(true)
 }
 
 dependencies {
+    implementation(project(":usbMiddle"))
+
     implementation("com.google.code.gson:gson:2.8.6")           // real module
     implementation("org.apache.commons:commons-lang3:3.10")     // automatic module
     implementation("commons-beanutils:commons-beanutils:1.9.4") // plain library (also brings in other libraries transitively)
