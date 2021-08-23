@@ -38,6 +38,7 @@ dependencies {
     implementation("commons-cli:commons-cli:1.4")               // plain library
 }
 
+//The ‘run’ task is of type JavaExec
 application {
     mainModule.set("org.gradle.sample.app")
     mainClass.set("org.gradle.sample.app.Main")
