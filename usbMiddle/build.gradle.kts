@@ -21,12 +21,40 @@ extraJavaModuleInfo {
 //    module("commons-collections-3.2.2.jar", "org.apache.commons.collections", "3.2.2")
 //    automaticModule("commons-logging-1.2.jar", "org.apache.commons.logging")
 
-    module("usb-api-1.0.2.jar", "javax.usb", "1.0.2"){
+    module("usb-api-1.0.2.jar", "javax.usb.API", "1.0.2"){
         exports("javax.usb")
     }
+
+    module("usb4java-1.3.0.jar", "usb4java.JNI", "1.3.0"){
+        requires("usb4java.LINUX")
+        exports("org.usb4java")
+    }
+
+    // implementation class (was org.usb4java.javax)
+    module("usb4java-javax-1.3.0.jar", "usb4java.IMPL", "1.3.0"){
+        requires("javax.usb.API")
+        requires("usb4java.JNI")
+        exports("org.usb4java.javax")
+    }
+
+    module("libusb4java-1.3.0-linux-x86.jar", "org.usb4java.javax", "1.3.0")
+    module("libusb4java-1.3.0-linux-x86-64.jar", "usb4java.LINUX", "1.3.0")
+    module("libusb4java-1.3.0-win32-x86.jar", "org.usb4java.javax", "1.3.0")
+    module("libusb4java-1.3.0-win32-x86-64.jar", "org.usb4java.javax", "1.3.0")
+    module("libusb4java-1.3.0-darwin-x86-64.jar", "org.usb4java.javax", "1.3.0")
+    module("libusb4java-1.3.0-linux-arm.jar", "org.usb4java.javax", "1.3.0")
+    module("libusb4java-1.3.0-linux-aarch64.jar", "org.usb4java.javax", "1.3.0")
+
+    module("usb4java-1.3.0.jar", "org.usb4java", "1.3.0")
+
 }
 dependencies {
-    implementation("javax.usb:usb-api:1.0.2")
+    implementation("javax.usb:usb-api:1.0.2") {isTransitive = true}
+    implementation ("org.usb4java:usb4java-javax:1.3.0") {isTransitive = false} // has to be implementation
+    implementation ("org.usb4java:usb4java:1.3.0") {isTransitive = false} // has to be implementation
+    implementation ("org.usb4java:usb4java:1.3.0") {isTransitive = false}
+    implementation ("org.usb4java:libusb4java:1.3.0:linux-x86-64"){isTransitive = false}
+
 }
 
 

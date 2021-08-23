@@ -1,19 +1,12 @@
 package org.gradle.sample.app;
 
 import com.earthtoernie.usb.UsbUtils;
-import com.google.gson.Gson;
-import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.lang3.StringUtils;
-import org.gradle.sample.app.data.Message;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
         UsbUtils usbUtils = new UsbUtils();
+        usbUtils.checkUsb4java();
 
 //        System.out.println("ARGS:");
 //        System.out.println(args);
