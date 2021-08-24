@@ -37,6 +37,7 @@ extraJavaModuleInfo {
 
     module("usb4java-1.3.0.jar", "usb4java.JNI", "1.3.0"){
         requires("usb4java.LINUX")
+        requires("native_resources")
         exports("org.usb4java")
     }
 
@@ -65,6 +66,8 @@ java {
 
 dependencies {
     implementation(project(":usbMiddle"))
+    implementation(project(":nativeResources"))
+
 
 //    implementation("com.google.code.gson:gson:2.8.6")           // real module
 //    implementation("org.apache.commons:commons-lang3:3.10")     // automatic module

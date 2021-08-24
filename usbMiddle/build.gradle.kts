@@ -27,6 +27,7 @@ extraJavaModuleInfo {
 
     module("usb4java-1.3.0.jar", "usb4java.JNI", "1.3.0"){
         requires("usb4java.LINUX")
+        requires("native_resources")
         exports("org.usb4java")
     }
 
@@ -54,6 +55,8 @@ dependencies {
     implementation ("org.usb4java:usb4java:1.3.0") {isTransitive = false} // has to be implementation
     implementation ("org.usb4java:usb4java:1.3.0") {isTransitive = false}
     implementation ("org.usb4java:libusb4java:1.3.0:linux-x86-64"){isTransitive = false}
+    implementation(project(":nativeResources"))
+
 
 }
 
