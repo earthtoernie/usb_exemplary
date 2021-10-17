@@ -35,16 +35,18 @@ extraJavaModuleInfo {
         exports("javax.usb")
     }
 
-    module("usb4java-1.3.0.jar", "usb4java.JNI", "1.3.0"){
-        requires("usb4java.LINUX")
-        requires("native_resources")
-        exports("org.usb4java")
-    }
+    // (package org.usb4java) contains Loader class, replaced with native custom class
+//    module("usb4java-1.3.0.jar", "usb4java.JNI", "1.3.0"){
+////        requires("usb4java.LINUX")
+//        requires("native_resources")
+//        exports("org.usb4java")
+//    }
 
-    // implementation class (was org.usb4java.javax)
+    // implementation class (package org.usb4java.javax), USB impl, decoupled from hardware
     module("usb4java-javax-1.3.0.jar", "usb4java.IMPL", "1.3.0"){
+        requires("org.apache.commons.lang3")
         requires("javax.usb.API")
-        requires("usb4java.JNI")
+        requires("native_resources")
         exports("org.usb4java.javax")
     }
 
@@ -67,7 +69,7 @@ java {
 dependencies {
     implementation(project(":usbMiddle"))
     implementation(project(":nativeResources"))
-
+    implementation("org.apache.commons:commons-lang3:3.12.0")
 
 //    implementation("com.google.code.gson:gson:2.8.6")           // real module
 //    implementation("org.apache.commons:commons-lang3:3.10")     // automatic module

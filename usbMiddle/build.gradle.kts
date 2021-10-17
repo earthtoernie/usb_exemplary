@@ -25,16 +25,16 @@ extraJavaModuleInfo {
         exports("javax.usb")
     }
 
-    module("usb4java-1.3.0.jar", "usb4java.JNI", "1.3.0"){
-        requires("usb4java.LINUX")
-        requires("native_resources")
-        exports("org.usb4java")
-    }
+//    module("usb4java-1.3.0.jar", "usb4java.JNI", "1.3.0"){
+//        requires("usb4java.LINUX")
+//        requires("native_resources")
+//        exports("org.usb4java")
+//    }
 
     // implementation class (was org.usb4java.javax)
     module("usb4java-javax-1.3.0.jar", "usb4java.IMPL", "1.3.0"){
         requires("javax.usb.API")
-        requires("usb4java.JNI")
+        requires("native_resources")
         exports("org.usb4java.javax")
     }
 
@@ -52,7 +52,7 @@ extraJavaModuleInfo {
 dependencies {
     implementation("javax.usb:usb-api:1.0.2") {isTransitive = true}
     implementation ("org.usb4java:usb4java-javax:1.3.0") {isTransitive = false} // has to be implementation
-    implementation ("org.usb4java:usb4java:1.3.0") {isTransitive = false} // has to be implementation
+//    implementation ("org.usb4java:usb4java:1.3.0") {isTransitive = false} // has to be implementation
     implementation ("org.usb4java:libusb4java:1.3.0:linux-x86-64"){isTransitive = false}
     implementation(project(":nativeResources"))
 
