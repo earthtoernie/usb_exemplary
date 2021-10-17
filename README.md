@@ -20,5 +20,10 @@ https://stackoverflow.com/questions/46861589/accessing-resource-files-from-exter
 
 ClassLoader.getSystemResources("libusb4java.so")
 
+ClassLoader.getSystemResources("libusb4java.so")
+Loader.class.getResource("/org/usb4java/Loader.class")
+Loader.class.getResource("/com/earthtoernie/bin/Empty.class")
+https://leward.eu/2020/02/16/java-load-resource-from-another-module.html
+ModuleLayer.boot().modules()
 
 com.earthtoernie.bin.Empty.class.getResource("libusb4java.so")
