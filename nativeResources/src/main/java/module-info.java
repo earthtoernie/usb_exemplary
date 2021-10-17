@@ -1,3 +1,3 @@
 module native_resources {
-    exports com.earthtoernie.bin;
+    opens org.usb4java;
 }

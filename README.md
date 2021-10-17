@@ -26,15 +26,16 @@ Loader.class.getResource("/com/earthtoernie/bin/Empty.class")
 https://leward.eu/2020/02/16/java-load-resource-from-another-module.html
 ModuleLayer.boot().modules()
 
-com.earthtoernie.bin.Empty.class.getResource("libusb4java.so")
+Empty.class.getResource("libusb4java.so")
 
-com.earthtoernie.bin.Empty.class.getModule().isExported("com.earthtoernie.bin.Empty")
+Empty.class.getModule().isExported("Empty")
 https://docs.oracle.com/en/java/javase/13/docs/api/java.base/java/lang/Module.html
 
 ----------------------
 https://docs.oracle.com/en/java/javase/13/docs/api/java.base/java/lang/Module.html#isExported(java.lang.String)
-com.earthtoernie.bin.Empty.class.getModule().isOpen("com.earthtoernie.bin")
+Empty.class.getModule().isOpen("com.earthtoernie.bin")
 org.usb4java.Loader.class.getModule() --> usb4java.JNI
 
-com.earthtoernie.bin.Empty.class.getModule().isOpen("com.earthtoernie.bin", org.usb4java.Loader.class.getModule()) --> true
-com.earthtoernie.bin.Empty.class.getResource("/org/usb4java/linux-x86-64/libusb4java.so") -> works!
+Empty.class.getModule().isOpen("com.earthtoernie.bin", org.usb4java.Loader.class.getModule()) --> true
+Empty.class.getResource("/org/usb4java/linux-x86-64/libusb4java.so") -> works!
+ClassLoader.getSystemResource("org/usb4java/linux_x86_64/libusb4java.so")
