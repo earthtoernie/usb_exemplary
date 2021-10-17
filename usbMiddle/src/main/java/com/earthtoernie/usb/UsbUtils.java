@@ -1,10 +1,7 @@
 package com.earthtoernie.usb;
 
 
-import javax.usb.UsbException;
-import javax.usb.UsbHostManager;
-import javax.usb.UsbHub;
-import javax.usb.UsbServices;
+import javax.usb.*;
 import java.util.List;
 
 public class UsbUtils {
@@ -12,7 +9,8 @@ public class UsbUtils {
         try {
             UsbServices services = UsbHostManager.getUsbServices();
             UsbHub rootHub = services.getRootUsbHub();
-            List devices = rootHub.getAttachedUsbDevices();
+            List<UsbDevice> devices = rootHub.getAttachedUsbDevices();
+
 
             System.out.println(devices.toString());
 
