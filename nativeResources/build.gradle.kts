@@ -1,5 +1,6 @@
 plugins {
     `java-library`
+    id("myproject.java-conventions")
 }
 
 repositories {
@@ -35,12 +36,12 @@ tasks.create("buildExt", Jar::class) {
     from(zipTree(layout.buildDirectory.dir("foo").get().toString() + "/bar.jar"))
 }
 
-tasks.register<Copy>("downloadToPrepare") {
+tasks.register<Copy>("downloadToPrepare") { // TODO this has to be triggered
     from(configurations.getByName("downloadOnly"))
     into(layout.buildDirectory.dir("foo"))
 }
 
-val downloadOnly by configurations.creating
+val downloadOnly: Configuration by configurations.creating
 //https://docs.gradle.org/current/userguide/migrating_from_groovy_to_kotlin_dsl.html#configurations-and-dependencies
 dependencies {
     downloadOnly ("org.usb4java:usb4java:1.3.0") {isTransitive = false}
