@@ -1,5 +1,5 @@
 plugins {
-    `kotlin-dsl` // used for the convntions plugin
+    `kotlin-dsl` // used for the conventions plugin
     `java-gradle-plugin` // so we can assign and ID to our plugin
 }
 
@@ -8,6 +8,7 @@ dependencies {
 }
 
 repositories {
+    gradlePluginPortal()
     mavenCentral()
 }
 

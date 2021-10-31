@@ -1,6 +1,6 @@
 plugins {
     `java-library`
-    id("myproject.java-conventions")
+    id("myproject.java-common-conventions")
     id("extra-java-module-info") // apply my own plugin written in buildSrc
 }
 

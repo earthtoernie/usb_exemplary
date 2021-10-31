@@ -1,6 +1,6 @@
 plugins {
     application
-    id("myproject.java-conventions") // for common libs
+    id("myproject.java-common-conventions") // for common libs
     id("extra-java-module-info") // apply my own plugin written in buildSrc
 }
 
@@ -50,5 +50,5 @@ dependencies {
 //The ‘run’ task is of type JavaExec
 application {
     mainModule.set("org.gradle.sample.app")
-    mainClass.set("org.gradle.sample.app.Main")
+    mainClass.set("org.gradle.sample.app.MainUsbSanity")
 }

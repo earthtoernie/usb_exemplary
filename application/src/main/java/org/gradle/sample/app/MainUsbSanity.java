@@ -2,7 +2,7 @@ package org.gradle.sample.app;
 
 import com.earthtoernie.usb.UsbUtils;
 
-public class Main {
+public class MainUsbSanity {
 
     public static void main(String[] args) throws Exception {
         UsbUtils usbUtils = new UsbUtils();
