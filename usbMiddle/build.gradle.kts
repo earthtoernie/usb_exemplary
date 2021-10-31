@@ -1,6 +1,5 @@
 plugins {
-    `java-library`
-    id("myproject.java-common-conventions")
+    id("myproject.java-library-conventions")
     id("extra-java-module-info") // apply my own plugin written in buildSrc
 }
 
@@ -17,10 +16,10 @@ extraJavaModuleInfo {
         exports("org.usb4java.javax")
     }
 
-
 }
 dependencies {
-    implementation("javax.usb:usb-api:1.0.2") {isTransitive = true}
+    implementation("org.apache.commons:commons-lang3:3.12.0")
+    implementation("javax.usb:usb-api:1.0.2") {isTransitive = false}
     implementation ("org.usb4java:usb4java-javax:1.3.0") {isTransitive = false} // has to be implementation
     implementation(project(":nativeResources"))
 }

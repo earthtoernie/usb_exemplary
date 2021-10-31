@@ -10,6 +10,7 @@ repositories {
 }
 
 java {
+    modularity.inferModulePath.set(true)
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(17))
 //        https://blog.gradle.org/java-toolchains

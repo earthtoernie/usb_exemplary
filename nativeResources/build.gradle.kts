@@ -1,11 +1,7 @@
 plugins {
-    `java-library`
-    id("myproject.java-common-conventions")
+    id("myproject.java-library-conventions")
 }
 
-repositories {
-    mavenCentral()
-}
 version = "2.2.2"
 group = "org.usb4java"
 

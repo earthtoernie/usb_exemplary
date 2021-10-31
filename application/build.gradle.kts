@@ -21,7 +21,6 @@ extraJavaModuleInfo {
         exports("javax.usb")
     }
 
-
     // implementation class (package org.usb4java.javax), USB impl, decoupled from hardware
     module("usb4java-javax-1.3.0.jar", "usb4java.IMPL", "1.3.0"){
         requires("org.apache.commons.lang3")
@@ -38,13 +37,6 @@ java {
 
 dependencies {
     implementation(project(":usbMiddle"))
-    implementation(project(":nativeResources"))
-    implementation("org.apache.commons:commons-lang3:3.12.0")
-
-//    implementation("com.google.code.gson:gson:2.8.6")           // real module
-//    implementation("org.apache.commons:commons-lang3:3.10")     // automatic module
-//    implementation("commons-beanutils:commons-beanutils:1.9.4") // plain library (also brings in other libraries transitively)
-//    implementation("commons-cli:commons-cli:1.4")               // plain library
 }
 
 //The ‘run’ task is of type JavaExec
