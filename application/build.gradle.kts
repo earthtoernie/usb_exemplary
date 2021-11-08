@@ -42,5 +42,12 @@ dependencies {
 //The ‘run’ task is of type JavaExec
 application {
     mainModule.set("org.gradle.sample.app")
+    mainClass.set("org.gradle.sample.app.MainUsbPrettyList")
+}
+
+
+tasks.register<JavaExec>("z_runSimple") {
+    mainModule.set("org.gradle.sample.app")
     mainClass.set("org.gradle.sample.app.MainUsbSanity")
 }
+//https://stackoverflow.com/questions/18421857/is-it-possible-to-specify-multiple-main-classes-using-gradle-application-plugi/23742222

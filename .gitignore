@@ -9,7 +9,9 @@ usbMiddle/build/
 usbdb/build/
 nativeResources/build/
 gui/build/
+usbDb/build/
 libusb4java.so
+test.db
 *.db
 *.db-journal
 
