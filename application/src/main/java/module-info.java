@@ -4,4 +4,5 @@ module org.gradle.sample.app {
 
 //    requires javax.usb.API;
     requires usb_middle;
+    requires org.apache.commons.lang3;
 }

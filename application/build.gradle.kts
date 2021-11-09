@@ -37,6 +37,7 @@ java {
 
 dependencies {
     implementation(project(":usbMiddle"))
+    implementation("org.apache.commons:commons-lang3:3.12.0")
 }
 
 //The ‘run’ task is of type JavaExec

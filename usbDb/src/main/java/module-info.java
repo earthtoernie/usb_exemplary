@@ -1,4 +1,5 @@
 module usb_db {
+    exports com.earthtoernie.usbdb;
     requires java.sql;
     requires org.apache.commons.lang3;
     requires org.apache.commons.io;

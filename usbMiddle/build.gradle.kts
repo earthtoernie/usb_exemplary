@@ -22,6 +22,7 @@ dependencies {
     implementation("javax.usb:usb-api:1.0.2") {isTransitive = false}
     implementation ("org.usb4java:usb4java-javax:1.3.0") {isTransitive = false} // has to be implementation
     implementation(project(":nativeResources"))
+    implementation(project(":usbDb"))
 }
 
 

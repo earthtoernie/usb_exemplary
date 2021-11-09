@@ -1,12 +1,17 @@
 package org.gradle.sample.app;
 
+import com.earthtoernie.usb.USBDeviceDescriber;
 import com.earthtoernie.usb.UsbUtils;
+import org.apache.commons.lang3.tuple.Pair;
+
 
 public class MainUsbPrettyList {
 
     public static void main(String[] args) throws Exception {
-        UsbUtils usbUtils = new UsbUtils();
-        usbUtils.checkUsb4java();
+//        UsbUtils usbUtils = new UsbUtils();
+//        usbUtils.checkUsb4java();
+
+        USBDeviceDescriber.mainNoExceptions();
 
 //        System.out.println("ARGS:");
 //        System.out.println(args);

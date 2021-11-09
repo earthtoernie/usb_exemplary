@@ -17,6 +17,8 @@ public class UsbDb {
     private static final Pattern VID_LINE = Pattern.compile("^([0-9a-fA-F]{4})\\s+(.*)");
     private static final Pattern PID_LINE = Pattern.compile("^\\t([0-9a-fA-F]{4})\\s+(.*)");
 
+    private static final String JDBC_URL = "jdbc:sqlite:test.db";
+
     public static void main(String args[]) { }
 
     public static String getHexString(int i) {
@@ -28,7 +30,7 @@ public class UsbDb {
         Connection c = null;
         try {
             Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection("jdbc:sqlite:test.db");
+            c = DriverManager.getConnection(JDBC_URL);
             c.setAutoCommit(false);
             PreparedStatement selectVendorPreparedStatement = c.prepareStatement("SELECT * FROM VID_TABLE WHERE id=?");
             selectVendorPreparedStatement.setInt(1, vid);
@@ -46,7 +48,7 @@ public class UsbDb {
         Connection c = null;
         try {
             Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection("jdbc:sqlite:test.db");
+            c = DriverManager.getConnection(JDBC_URL);
             c.setAutoCommit(false);
             PreparedStatement selectVendorPreparedStatement = c.prepareStatement("SELECT * FROM VID_TABLE WHERE id=?");
             selectVendorPreparedStatement.setInt(1, vid);
@@ -72,79 +74,6 @@ public class UsbDb {
 
     }
 
-    public void populateDB() {
-        Connection c = null;
-        try {
-            c = DriverManager.getConnection("jdbc:sqlite:test.db");
-            System.out.println("Opened database successfully");
-
-            LineIterator it = FileUtils.lineIterator(new File("/var/lib/usbutils/usb.ids"), "UTF-8");
-
-            Statement dropVidTableStatement = c.createStatement();
-            dropVidTableStatement.executeUpdate("DROP TABLE IF EXISTS VID_TABLE");
-
-            Statement createVidTableStatement = c.createStatement();
-            String createVidTableString = "CREATE TABLE VID_TABLE " +
-                    "(ID INT PRIMARY KEY     NOT NULL," +
-                    " VID           TEXT     NOT NULL," +
-                    " VENDOR        TEXT     NOT NULL);";
-            createVidTableStatement.executeUpdate(createVidTableString);
-
-            String lastVid = "";
-            try {
-                while (it.hasNext()) {
-                    String line = it.nextLine();
-                    Matcher matcherVid = VID_LINE.matcher(line);
-                    Matcher matcherPid = PID_LINE.matcher(line);
-                    if (matcherVid.find()) {
-                        String nextVid = matcherVid.group(1);
-                        String vendor = matcherVid.group(2);
-                        if (lastVid != nextVid) {
-                            System.out.println(line); // prints vendors
-                            String createVidRowString = "INSERT INTO VID_TABLE (ID,VID,VENDOR) VALUES (?, ?, ? );";
-                            PreparedStatement createVidRowPreparedStatement = c.prepareStatement(createVidRowString);
-                            createVidRowPreparedStatement.setInt(1, Integer.parseInt(nextVid, 16));
-                            createVidRowPreparedStatement.setString(2, nextVid);
-                            createVidRowPreparedStatement.setString(3, vendor);
-                            createVidRowPreparedStatement.executeUpdate();
-                            lastVid = nextVid;
-                            PreparedStatement dropVidSpecificTablePreparedStatement =
-                                    c.prepareStatement("DROP TABLE IF EXISTS \"$tableName\";".replace("$tableName", lastVid));
-                            dropVidSpecificTablePreparedStatement.executeUpdate();
-                            Statement createVidSpecificTableStatement = c.createStatement();
-                            String createVidSpecificTableString = "CREATE TABLE \"$tableName\" "+
-                                    "(ID INT PRIMARY KEY    NOT NULL," +
-                                    " PID           TEXT    NOT NULL," +
-                                    " PRODUCT       TEXT    NOT NULL)";
-                            var foo = createVidSpecificTableString.replace("$tableName", lastVid);
-                            createVidSpecificTableStatement.executeUpdate(createVidSpecificTableString.replace("$tableName", lastVid));
-                        }
-
-                    } else if (matcherPid.find()) {
-                        String pid = matcherPid.group(1);
-                        String product = matcherPid.group(2);
-                        String createPidRowString =
-                                "INSERT INTO \"$tableName\" (ID,PID,PRODUCT) VALUES (?, ?, ? );".replace("$tableName", lastVid);
-                        PreparedStatement createPidRowPreparedStatement = c.prepareStatement(createPidRowString);
-                        createPidRowPreparedStatement.setInt(1, Integer.parseInt(pid, 16));
-                        createPidRowPreparedStatement.setString(2, pid);
-                        createPidRowPreparedStatement.setString(3, product);
-                        createPidRowPreparedStatement.executeUpdate();
-
-                    }
-                }
-            } catch(NoSuchElementException ex) {
-                ex.printStackTrace();
-            }finally {
-                LineIterator.closeQuietly(it);
-            }
-        } catch (SQLException | IOException e) {
-            System.err.println(e);
-            // System.err.println(e.getClass().getName() + ": " + e.getMessage());
-            System.exit(0);
-        }
-    }
-
     private void printAllVendors(){
 
         Connection c = null;
@@ -156,7 +85,7 @@ public class UsbDb {
             e.printStackTrace();
         }
         try {
-            c = DriverManager.getConnection("jdbc:sqlite:test.db");
+            c = DriverManager.getConnection(JDBC_URL);
             c.setAutoCommit(false);
             stmt = c.createStatement();
             ResultSet rs = stmt.executeQuery( "SELECT * FROM VID_TABLE;" );

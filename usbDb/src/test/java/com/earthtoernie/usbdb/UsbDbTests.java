@@ -28,11 +28,7 @@ public class UsbDbTests {
         String result = UsbDb.getHexString(30584);
         assertEquals("7778", result);
     }
-//    @Test
-    public void TestPopulateDb(){
-        UsbDb usbDb = new UsbDb();
-        usbDb.populateDB();
-    }
+
     @AfterAll
     static void tear(){
         System.out.println("@AfterAll executed");

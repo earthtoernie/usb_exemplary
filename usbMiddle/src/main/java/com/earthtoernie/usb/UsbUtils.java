@@ -1,15 +1,27 @@
 package com.earthtoernie.usb;
+import com.earthtoernie.usbdb.UsbDb;
+import org.apache.commons.lang3.tuple.Pair;
+
 
 
 import javax.usb.*;
 import java.util.List;
 
 public class UsbUtils {
+
+    private final UsbDb usbDb;
+
+
+    public UsbUtils() {
+        usbDb = new UsbDb();
+    }
     public void checkUsb4java(){
         try {
             UsbServices services = UsbHostManager.getUsbServices();
             UsbHub rootHub = services.getRootUsbHub();
             List<UsbDevice> devices = rootHub.getAttachedUsbDevices();
+//            List<Pair<String, String>> devicesPretty = devices.stream()
+//                            .map(x -> usbDb.getVendorAndDevice(x.toString()))
 
 
             System.out.println(devices.toString());
