@@ -12,15 +12,12 @@ base {
 ext {
     set("baseFiles", listOf("com/thirdparty/base/**"))
     set("extFiles", listOf("com/thirdparty/ext/**"))
-
 }
 
 tasks.withType<Jar> {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     excludes.addAll(ext.get("extFiles") as Collection<String>)
     from(zipTree(layout.buildDirectory.dir("jars").get().toString() + "/usb4java-1.3.0.jar"))
-
-
 }
 
 
@@ -31,13 +28,13 @@ tasks.create("z_buildExt", Jar::class) {
     from(zipTree(layout.buildDirectory.dir("jars").get().toString() + "/usb4java-1.3.0.jar"))
 }
 
-tasks.register<Copy>("z_downloadToPrepare") { // TODO this has to be triggered
+tasks.register<Copy>("z_downloadToPrepare") {
     from(configurations.getByName("downloadOnly"))
     into(layout.buildDirectory.dir("jars"))
 }
 
-tasks.jar {
-    dependsOn("z_downloadToPrepare")
+tasks.compileJava {
+    dependsOn("z_extractAll")
 }
 
 tasks.register<Copy>("z_extractAll") {
