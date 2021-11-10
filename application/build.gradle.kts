@@ -7,10 +7,6 @@ plugins {
 version = "1.0.2"
 group = "org.gradle.sample"
 
-repositories {
-    mavenCentral()
-}
-
 tasks.compileJava {
     options.javaModuleVersion.set(provider({ project.version as String }))
 }

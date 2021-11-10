@@ -4,9 +4,13 @@ import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import javax.usb.*;
+//import org.usb4java.javax.DeviceNotFoundException
+
 // Java I/O: Tips and Techniques for Putting I/O to Work Second Edition
 // by Elliotte Rusty Harold
 // Page 576
+
+// see https://github.com/usb4java/usb4java-examples
 public class USBDeviceDescriber {
     public static void main(String[] args) throws UsbException, UnsupportedEncodingException {
         UsbServices services = UsbHostManager.getUsbServices();
@@ -40,13 +44,13 @@ public class USBDeviceDescriber {
         UsbDeviceDescriptor descriptor = device.getUsbDeviceDescriptor();
         byte manufacturerCode = descriptor.iManufacturer();
         System.out.println("Manufacturer index: " + manufacturerCode);
-        System.out.println("Manufacturer string: " + device.getString(manufacturerCode));
+        System.out.println("Manufacturer string: " + getStringSafe(device, manufacturerCode));
         byte productCode = descriptor.iProduct();
         System.out.println("Product index: " + productCode);
-        System.out.println("Product string: " + device.getString(productCode));
+        System.out.println("Product string: " + getStringSafe(device, productCode));
         byte serialCode = descriptor.iSerialNumber();
         System.out.println("Serial number index: " + serialCode);
-        System.out.println("Serial number string: " + device.getString(serialCode));
+        System.out.println("Serial number string: " + getStringSafe(device, serialCode));
 
         System.out.println("Vendor ID: 0x" + Integer.toHexString(descriptor.idVendor()));
         System.out.println("Product ID: 0x" + Integer.toHexString(descriptor.idProduct()));
@@ -60,6 +64,21 @@ public class USBDeviceDescriber {
         System.out.println("Number of configurations:  " + descriptor.bNumConfigurations());
 
         System.out.println();
+    }
+
+    public static String getStringSafe(UsbDevice device, byte index) {
+        // javax.usb.UsbPlatformException: USB error 9: Unable to get string descriptor languages: Pipe error
+        try {
+            return device.getString(index);
+        } catch (UsbPlatformException e) {
+            return "####################";
+        }
+        catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (UsbException e) {
+            e.printStackTrace();
+        }
+        return "*************";
     }
 
     public static String decodeBCD(short bcd) {
