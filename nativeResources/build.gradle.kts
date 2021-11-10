@@ -25,7 +25,6 @@ tasks.withType<Jar> {
 
 
 tasks.create("z_buildExt", Jar::class) {
-    dependsOn("build")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     excludes.addAll(ext.get("baseFiles") as Collection<String>)
     from(sourceSets.main.get().output.classesDirs) // <-- HERE
@@ -37,10 +36,9 @@ tasks.register<Copy>("z_downloadToPrepare") { // TODO this has to be triggered
     into(layout.buildDirectory.dir("jars"))
 }
 
-//tasks.register<Copy>("z_downloadToPrepare_linux_x86_64") { // TODO this has to be triggered
-//    from(configurations.getByName("downloadOnly"))
-//    into(layout.buildDirectory.dir("jars"))
-//}
+tasks.jar {
+    dependsOn("z_downloadToPrepare")
+}
 
 tasks.register<Copy>("z_extractAll") {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -73,10 +71,6 @@ dependencies {
 // org/usb4java/linux-arm/libusb4java.so
 // org/usb4java/linux-x86-64/libusb4java.so
 // org/usb4java/win32-x86-64/libusb4java.dll
-
-
-
-
 
 
 //https://gist.github.com/cholick/7177513
