@@ -18,30 +18,65 @@ ext {
 tasks.withType<Jar> {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     excludes.addAll(ext.get("extFiles") as Collection<String>)
-    from(zipTree(layout.buildDirectory.dir("foo").get().toString() + "/usb4java-1.3.0.jar"))
+    from(zipTree(layout.buildDirectory.dir("jars").get().toString() + "/usb4java-1.3.0.jar"))
 
 
 }
 
 
-tasks.create("buildExt", Jar::class) {
+tasks.create("z_buildExt", Jar::class) {
     dependsOn("build")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     excludes.addAll(ext.get("baseFiles") as Collection<String>)
     from(sourceSets.main.get().output.classesDirs) // <-- HERE
-    from(zipTree(layout.buildDirectory.dir("foo").get().toString() + "/bar.jar"))
+    from(zipTree(layout.buildDirectory.dir("jars").get().toString() + "/usb4java-1.3.0.jar"))
 }
 
-tasks.register<Copy>("downloadToPrepare") { // TODO this has to be triggered
+tasks.register<Copy>("z_downloadToPrepare") { // TODO this has to be triggered
     from(configurations.getByName("downloadOnly"))
-    into(layout.buildDirectory.dir("foo"))
+    into(layout.buildDirectory.dir("jars"))
 }
 
+//tasks.register<Copy>("z_downloadToPrepare_linux_x86_64") { // TODO this has to be triggered
+//    from(configurations.getByName("downloadOnly"))
+//    into(layout.buildDirectory.dir("jars"))
+//}
+
+tasks.register<Copy>("z_extractAll") {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(zipTree(layout.buildDirectory.dir("jars").get().toString() + "/libusb4java-1.3.0-linux-aarch64.jar"))
+    exclude("META-INF/")
+    into(layout.projectDirectory.dir("src/main/resources"))
+    from(zipTree(layout.buildDirectory.dir("jars").get().toString() + "/libusb4java-1.3.0-linux-arm.jar"))
+    exclude("META-INF/")
+    into(layout.projectDirectory.dir("src/main/resources"))
+    from(zipTree(layout.buildDirectory.dir("jars").get().toString() + "/libusb4java-1.3.0-linux-x86-64.jar"))
+    exclude("META-INF/")
+    into(layout.projectDirectory.dir("src/main/resources"))
+    from(zipTree(layout.buildDirectory.dir("jars").get().toString() + "/libusb4java-1.3.0-win32-x86-64.jar"))
+    exclude("META-INF/")
+    into(layout.projectDirectory.dir("src/main/resources"))
+
+}
 val downloadOnly: Configuration by configurations.creating
 //https://docs.gradle.org/current/userguide/migrating_from_groovy_to_kotlin_dsl.html#configurations-and-dependencies
 dependencies {
+    downloadOnly ("org.usb4java:libusb4java:1.3.0:linux-aarch64") {isTransitive = false}
+    downloadOnly ("org.usb4java:libusb4java:1.3.0:linux-arm") {isTransitive = false}
+    downloadOnly ("org.usb4java:libusb4java:1.3.0:linux-x86-64") {isTransitive = false}
+    downloadOnly ("org.usb4java:libusb4java:1.3.0:win32-x86-64") {isTransitive = false}
     downloadOnly ("org.usb4java:usb4java:1.3.0") {isTransitive = false}
 }
+
+// source roots
+// org/usb4java/linux-aarch64/libusb4java.so
+// org/usb4java/linux-arm/libusb4java.so
+// org/usb4java/linux-x86-64/libusb4java.so
+// org/usb4java/win32-x86-64/libusb4java.dll
+
+
+
+
 
 
 //https://gist.github.com/cholick/7177513

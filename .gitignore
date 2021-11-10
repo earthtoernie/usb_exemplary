@@ -11,6 +11,8 @@ nativeResources/build/
 gui/build/
 usbDb/build/
 libusb4java.so
+libusb4java.dll
+nativeResources/src/main/resources/org/
 test.db
 *.db
 *.db-journal
