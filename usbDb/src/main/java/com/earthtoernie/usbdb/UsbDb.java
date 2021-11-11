@@ -60,7 +60,11 @@ public class UsbDb {
             selectProductPreparedStatement.setInt(1, pid);
             ResultSet resultSetProduct = selectProductPreparedStatement.executeQuery();
             resultSetProduct.next();
-            String product = resultSetProduct.getString("PRODUCT");
+            String product = "** NOT FOUND **";
+            if(!resultSetProduct.isClosed()) {
+                // this throw if device id not found, so have to check isClosed
+                product = resultSetProduct.getString("PRODUCT");
+            }
 
             return ImmutablePair.of(vendor, product);
 

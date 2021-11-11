@@ -9,6 +9,7 @@ base {
     archivesBaseName = "usb4JavaNative"
 }
 
+// not used
 ext {
     set("baseFiles", listOf("com/thirdparty/base/**"))
     set("extFiles", listOf("com/thirdparty/ext/**"))

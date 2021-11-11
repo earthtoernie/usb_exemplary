@@ -14,15 +14,11 @@ import java.util.List;
 // see https://github.com/usb4java/usb4java-examples
 public class USBDeviceDescriber {
 
-    UsbDb usbDb;
+    private static final UsbDb usbDb = new UsbDb();
 
-    public USBDeviceDescriber() {
-        usbDb = new UsbDb();
-        String result = usbDb.getVendor(1);
-        System.out.println("((((((((((((((((((((((((((((((((((((((((((");
-        System.out.println(result);
+    private USBDeviceDescriber() {
+        // static only class
     }
-
 
     public static void main(String[] args) throws UsbException, UnsupportedEncodingException {
         UsbServices services = UsbHostManager.getUsbServices();
@@ -30,7 +26,7 @@ public class USBDeviceDescriber {
         listDevices(root);
     }
 
-    public void mainNoExceptions(){
+    public static void mainNoExceptions(){
         try {
             UsbServices services = UsbHostManager.getUsbServices();
             UsbHub root = services.getRootUsbHub();
@@ -38,8 +34,6 @@ public class USBDeviceDescriber {
         } catch (UsbException|UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-
-
     }
 
     public static void listDevices(UsbHub hub) throws UsbException, UnsupportedEncodingException {
@@ -56,13 +50,13 @@ public class USBDeviceDescriber {
         UsbDeviceDescriptor descriptor = device.getUsbDeviceDescriptor();
         byte manufacturerCode = descriptor.iManufacturer();
         System.out.println("Manufacturer index: " + manufacturerCode);
-        System.out.println("Manufacturer string: " + getStringSafe(device, manufacturerCode));
+        System.out.println("Manufacturer string: " + getStringSafe(device, manufacturerCode, UsbStringCode.MANUFACTURER_CODE));
         byte productCode = descriptor.iProduct();
         System.out.println("Product index: " + productCode);
-        System.out.println("Product string: " + getStringSafe(device, productCode));
+        System.out.println("Product string: " + getStringSafe(device, productCode, UsbStringCode.PRODUCT_CODE));
         byte serialCode = descriptor.iSerialNumber();
         System.out.println("Serial number index: " + serialCode);
-        System.out.println("Serial number string: " + getStringSafe(device, serialCode));
+        System.out.println("Serial number string: " + getStringSafe(device, serialCode, UsbStringCode.SERIAL_CODE));
 
         System.out.println("Vendor ID: 0x" + Integer.toHexString(descriptor.idVendor()));
         System.out.println("Product ID: 0x" + Integer.toHexString(descriptor.idProduct()));
@@ -78,12 +72,24 @@ public class USBDeviceDescriber {
         System.out.println();
     }
 
-    public static String getStringSafe(UsbDevice device, byte index) {
+    public static String getStringSafe(UsbDevice device, byte index, UsbStringCode code) {
+        String resultString = "";
+
+        if(code == UsbStringCode.MANUFACTURER_CODE) {
+            int vendorId = device.getUsbDeviceDescriptor().idVendor();
+            resultString = usbDb.getVendor(vendorId);
+        }
+        if(code == UsbStringCode.PRODUCT_CODE) {
+            int vendorId = device.getUsbDeviceDescriptor().idVendor();
+            int productId = device.getUsbDeviceDescriptor().idProduct();
+            resultString = usbDb.getVendorAndDevice(vendorId, productId).right;
+        }
+
         // javax.usb.UsbPlatformException: USB error 9: Unable to get string descriptor languages: Pipe error
         try {
             return device.getString(index);
         } catch (UsbPlatformException e) {
-            return "####################";
+            return "#################### " + resultString;
         }
         catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -98,5 +104,11 @@ public class USBDeviceDescriber {
         int middle = (0xF0 & bcd) >> 4;
         int lower = 0x0F & bcd;
         return upper + "." + middle + "." + lower;
+    }
+
+    private enum UsbStringCode {
+        MANUFACTURER_CODE,
+        PRODUCT_CODE,
+        SERIAL_CODE
     }
 }

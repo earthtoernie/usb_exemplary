@@ -99,7 +99,7 @@ public class UsbDbBuilder {
                                     "(ID INT PRIMARY KEY    NOT NULL," +
                                     " PID           TEXT    NOT NULL," +
                                     " PRODUCT       TEXT    NOT NULL)";
-                            var foo = createVidSpecificTableString.replace("$tableName", lastVid);
+                            //var foo = createVidSpecificTableString.replace("$tableName", lastVid);
                             createVidSpecificTableStatement.executeUpdate(createVidSpecificTableString.replace("$tableName", lastVid));
                         }
 
