@@ -58,8 +58,8 @@ public class USBDeviceDescriber {
         System.out.println("Serial number index: " + serialCode);
         System.out.println("Serial number string: " + getStringSafe(device, serialCode, UsbStringCode.SERIAL_CODE));
 
-        System.out.println("Vendor ID: 0x" + Integer.toHexString(descriptor.idVendor()));
-        System.out.println("Product ID: 0x" + Integer.toHexString(descriptor.idProduct()));
+        System.out.println("Vendor ID: 0x" + Integer.toHexString(Short.toUnsignedInt(descriptor.idVendor())));
+        System.out.println("Product ID: 0x" + Integer.toHexString(Short.toUnsignedInt(descriptor.idProduct())));
         System.out.println("Class: " + descriptor.bDeviceClass());
         System.out.println("Subclass: " + descriptor.bDeviceSubClass());
         System.out.println("Protocol: " + descriptor.bDeviceProtocol());
@@ -76,20 +76,20 @@ public class USBDeviceDescriber {
         String resultString = "";
 
         if(code == UsbStringCode.MANUFACTURER_CODE) {
-            int vendorId = device.getUsbDeviceDescriptor().idVendor();
-            resultString = usbDb.getVendor(vendorId);
+            short idVendor = device.getUsbDeviceDescriptor().idVendor();
+            resultString = usbDb.getVendor(Short.toUnsignedInt(idVendor));
         }
         if(code == UsbStringCode.PRODUCT_CODE) {
-            int vendorId = device.getUsbDeviceDescriptor().idVendor();
-            int productId = device.getUsbDeviceDescriptor().idProduct();
-            resultString = usbDb.getVendorAndDevice(vendorId, productId).right;
+            short idVendor = device.getUsbDeviceDescriptor().idVendor();
+            short idProduct = device.getUsbDeviceDescriptor().idProduct();
+            resultString = usbDb.getVendorAndDevice(Short.toUnsignedInt(idVendor), Short.toUnsignedInt(idProduct)).right;
         }
 
         // javax.usb.UsbPlatformException: USB error 9: Unable to get string descriptor languages: Pipe error
         try {
             return device.getString(index);
         } catch (UsbPlatformException e) {
-            return "#################### " + resultString;
+            return "#################### " + resultString; // TODO can we avoid hitting this catch ever?
         }
         catch (UnsupportedEncodingException e) {
             e.printStackTrace();
