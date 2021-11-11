@@ -1,8 +1,6 @@
 package com.earthtoernie.usb;
+
 import com.earthtoernie.usbdb.UsbDb;
-import org.apache.commons.lang3.tuple.Pair;
-
-
 
 import javax.usb.*;
 import java.util.List;

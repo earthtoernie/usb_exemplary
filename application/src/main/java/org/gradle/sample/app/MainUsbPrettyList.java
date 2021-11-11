@@ -1,8 +1,6 @@
 package org.gradle.sample.app;
 
 import com.earthtoernie.usb.USBDeviceDescriber;
-import com.earthtoernie.usb.UsbUtils;
-import org.apache.commons.lang3.tuple.Pair;
 
 
 public class MainUsbPrettyList {
@@ -11,7 +9,10 @@ public class MainUsbPrettyList {
 //        UsbUtils usbUtils = new UsbUtils();
 //        usbUtils.checkUsb4java();
 
-        USBDeviceDescriber.mainNoExceptions();
+        USBDeviceDescriber deviceDescriber = new USBDeviceDescriber();
+        deviceDescriber.mainNoExceptions();
+//        org.sqlite.SQLiteException: [SQLITE_ERROR] SQL error or missing database (no such table: VID_TABLE)
+
 
 //        System.out.println("ARGS:");
 //        System.out.println(args);

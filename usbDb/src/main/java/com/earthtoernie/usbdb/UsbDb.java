@@ -1,23 +1,20 @@
 package com.earthtoernie.usbdb;
 
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.LineIterator;
-
-import java.io.File;
-import java.io.IOException;
-import java.sql.*;
-import java.util.NoSuchElementException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+
+import java.sql.*;
+import java.util.regex.Pattern;
 
 public class UsbDb {
 
     private static final Pattern VID_LINE = Pattern.compile("^([0-9a-fA-F]{4})\\s+(.*)");
     private static final Pattern PID_LINE = Pattern.compile("^\\t([0-9a-fA-F]{4})\\s+(.*)");
 
-    private static final String JDBC_URL = "jdbc:sqlite:test.db";
+    private String JDBC_URL = "jdbc:sqlite:build/usbids.db";
+    //  /home/user/IdeaProjects/usb_exemplary/usbDb/build/usbids.db
+
+    public UsbDb() {}
 
     public static void main(String args[]) { }
 

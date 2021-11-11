@@ -1,9 +1,10 @@
 package com.earthtoernie.usb;
 
-import java.io.UncheckedIOException;
-import java.io.UnsupportedEncodingException;
-import java.util.*;
+import com.earthtoernie.usbdb.UsbDb;
+
 import javax.usb.*;
+import java.io.UnsupportedEncodingException;
+import java.util.List;
 //import org.usb4java.javax.DeviceNotFoundException
 
 // Java I/O: Tips and Techniques for Putting I/O to Work Second Edition
@@ -12,13 +13,24 @@ import javax.usb.*;
 
 // see https://github.com/usb4java/usb4java-examples
 public class USBDeviceDescriber {
+
+    UsbDb usbDb;
+
+    public USBDeviceDescriber() {
+        usbDb = new UsbDb();
+        String result = usbDb.getVendor(1);
+        System.out.println("((((((((((((((((((((((((((((((((((((((((((");
+        System.out.println(result);
+    }
+
+
     public static void main(String[] args) throws UsbException, UnsupportedEncodingException {
         UsbServices services = UsbHostManager.getUsbServices();
         UsbHub root = services.getRootUsbHub();
         listDevices(root);
     }
 
-    public static void mainNoExceptions(){
+    public void mainNoExceptions(){
         try {
             UsbServices services = UsbHostManager.getUsbServices();
             UsbHub root = services.getRootUsbHub();
