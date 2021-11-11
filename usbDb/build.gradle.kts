@@ -22,10 +22,14 @@ tasks.register("z_buildUsbIdDb") {
         val dbFileName = "usbids.db"
         val sourceFileName = "usb.ids"
         val sourceFile = Paths.get(buildDir.toString(), File(sourceFileName).toString())
-        val destFile = Paths.get(buildDir.toString(), File(dbFileName).toString())
+        val destFile = Paths.get(layout.projectDirectory.dir("src/main/resources").toString(), File(dbFileName).toString())
         usbDbBuilder.populateDB("jdbc:sqlite:$destFile", sourceFile.toString(), 200, false);
     }
 }
+
+//tasks.register<Copy>("z_copyDatabase") {
+//
+//}
 
 tasks.register("z_countVendors") {
     dependsOn("downloadUsbIdFile")

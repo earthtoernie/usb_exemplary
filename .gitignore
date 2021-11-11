@@ -13,7 +13,7 @@ usbDb/build/
 libusb4java.so
 libusb4java.dll
 nativeResources/src/main/resources/org/
-test.db
+usbIds.db
 *.db
 *.db-journal
 

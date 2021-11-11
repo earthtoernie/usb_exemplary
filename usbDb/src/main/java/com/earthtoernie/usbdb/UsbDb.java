@@ -11,10 +11,11 @@ public class UsbDb {
     private static final Pattern VID_LINE = Pattern.compile("^([0-9a-fA-F]{4})\\s+(.*)");
     private static final Pattern PID_LINE = Pattern.compile("^\\t([0-9a-fA-F]{4})\\s+(.*)");
 
-    private String JDBC_URL = "jdbc:sqlite:build/usbids.db";
-    //  /home/user/IdeaProjects/usb_exemplary/usbDb/build/usbids.db
+    // private String JDBC_URL = "jdbc:sqlite:usbids.db";
+    // https://stackoverflow.com/questions/52092038/java-sqlite-unable-to-access-db-file-inside-executable-jar
+    private final String JDBC_URL = "jdbc:sqlite::resource:usbids.db";
 
-    public UsbDb() {}
+    public UsbDb() { }
 
     public static void main(String args[]) { }
 

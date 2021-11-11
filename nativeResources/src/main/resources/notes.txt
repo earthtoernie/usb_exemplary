@@ -1,1 +1,1 @@
-resources go here
+native resources go here
