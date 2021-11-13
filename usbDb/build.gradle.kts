@@ -4,7 +4,7 @@ plugins {
     id("myproject.java-library-conventions")
     `java-library`
 }
-tasks.register("downloadUsbIdFile"){
+tasks.register("z_downloadUsbIdFile"){
     doLast {
         val fileName = "usb.ids"
         val sourceUrl = "http://www.linux-usb.org/usb.ids"
@@ -16,7 +16,7 @@ tasks.register("downloadUsbIdFile"){
 // !!!!!!!!!!!!!!!!!! THIS MUST BE RUN TO GET VALUES FROM DATABASE !!!!!!!!!!!!!!!!!!
 // TODO check that database exists, to save time
 tasks.register("z_buildUsbIdDb") {
-    dependsOn("downloadUsbIdFile")
+    dependsOn("z_downloadUsbIdFile")
     doLast {
         val usbDbBuilder = com.earthtoernie.buildsrc.UsbDbBuilder()
         val dbFileName = "usbids.db"
@@ -27,12 +27,16 @@ tasks.register("z_buildUsbIdDb") {
     }
 }
 
+tasks.classes {
+    dependsOn("z_buildUsbIdDb")
+}
+
 //tasks.register<Copy>("z_copyDatabase") {
 //
 //}
 
 tasks.register("z_countVendors") {
-    dependsOn("downloadUsbIdFile")
+    dependsOn("z_downloadUsbIdFile")
     doLast {
         val usbDbBuilder = com.earthtoernie.buildsrc.UsbDbBuilder()
         // val dbFileName = "usbids.db"
