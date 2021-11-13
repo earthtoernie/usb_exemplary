@@ -28,14 +28,14 @@ tasks.create("z_buildExt", Jar::class) {
     from(sourceSets.main.get().output.classesDirs) // <-- HERE
     from(zipTree(layout.buildDirectory.dir("jars").get().toString() + "/usb4java-1.3.0.jar"))
 }
-
+// this one copies files to "jars"
 tasks.register<Copy>("z_downloadToPrepare") {
     from(configurations.getByName("downloadOnly"))
     into(layout.buildDirectory.dir("jars"))
 }
 
-tasks.compileJava {
-    dependsOn("z_extractAll")
+tasks.classes {
+    dependsOn("z_downloadToPrepare")
 }
 
 tasks.register<Copy>("z_extractAll") {

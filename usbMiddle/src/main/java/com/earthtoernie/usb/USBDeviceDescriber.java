@@ -4,6 +4,7 @@ import com.earthtoernie.usbdb.UsbDb;
 
 import javax.usb.*;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.List;
 //import org.usb4java.javax.DeviceNotFoundException
 
@@ -50,17 +51,28 @@ public class USBDeviceDescriber {
         UsbDeviceDescriptor descriptor = device.getUsbDeviceDescriptor();
         byte manufacturerCode = descriptor.iManufacturer();
         System.out.println("Manufacturer index: " + manufacturerCode);
-        System.out.println("Manufacturer string: " + getStringSafe(device, manufacturerCode, UsbStringCode.MANUFACTURER_CODE));
+        System.out.println("vendor string: " + getStringFromDb(device, UsbStringCode.MANUFACTURER_CODE));
+        System.out.println("Manufacturer string: " + getStringNative(device, manufacturerCode));
+//        System.out.println("Manufacturer string: " + Arrays.toString(getBytesNative(device, manufacturerCode)));
+
+
         byte productCode = descriptor.iProduct();
         System.out.println("Product index: " + productCode);
-        System.out.println("Product string: " + getStringSafe(device, productCode, UsbStringCode.PRODUCT_CODE));
+        System.out.println("Product string: " + getStringFromDb(device, UsbStringCode.PRODUCT_CODE));
+        System.out.println("Product string: " + getStringNative(device, productCode));
+//        System.out.println("Product string: " + Arrays.toString(getBytesNative(device, productCode)));
+
+
         byte serialCode = descriptor.iSerialNumber();
         System.out.println("Serial number index: " + serialCode);
-        System.out.println("Serial number string: " + getStringSafe(device, serialCode, UsbStringCode.SERIAL_CODE));
+        System.out.println("Serial number string: " + getStringFromDb(device, UsbStringCode.SERIAL_CODE));
+        System.out.println("Serial number string: " + getStringNative(device, serialCode));
+        System.out.println("Serial number string (bytes): " + Arrays.toString(getBytesNative(device, serialCode)));
+
 
         System.out.println("Vendor ID: 0x" + Integer.toHexString(Short.toUnsignedInt(descriptor.idVendor())));
         System.out.println("Product ID: 0x" + Integer.toHexString(Short.toUnsignedInt(descriptor.idProduct())));
-        System.out.println("Class: " + descriptor.bDeviceClass());
+        System.out.println("Class: " + descriptor.bDeviceClass()); // todo print this as an int
         System.out.println("Subclass: " + descriptor.bDeviceSubClass());
         System.out.println("Protocol: " + descriptor.bDeviceProtocol());
 
@@ -72,7 +84,7 @@ public class USBDeviceDescriber {
         System.out.println();
     }
 
-    public static String getStringSafe(UsbDevice device, byte index, UsbStringCode code) {
+    public static String getStringFromDb(UsbDevice device, UsbStringCode code) {
         String resultString = "";
 
         if(code == UsbStringCode.MANUFACTURER_CODE) {
@@ -84,19 +96,42 @@ public class USBDeviceDescriber {
             short idProduct = device.getUsbDeviceDescriptor().idProduct();
             resultString = usbDb.getVendorAndDevice(Short.toUnsignedInt(idVendor), Short.toUnsignedInt(idProduct)).right;
         }
+        return "# linux-usb.org: # " + resultString;
 
-        // javax.usb.UsbPlatformException: USB error 9: Unable to get string descriptor languages: Pipe error
+    }
+
+    public static String getStringNative(UsbDevice device, byte index) {
+        String resultString = "";
+
         try {
-            return device.getString(index);
+            resultString = device.getString(index);
         } catch (UsbPlatformException e) {
-            return "#################### " + resultString; // TODO can we avoid hitting this catch ever?
+            resultString =  "## UsbPlatformException" + e.getMessage().substring(30);
+            return resultString;
         }
         catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (UsbException e) {
             e.printStackTrace();
         }
-        return "*************";
+        return resultString;
+    }
+
+    public static byte[] getBytesNative(UsbDevice device, byte index) {
+        byte[] resultBytes;
+
+        try {
+            var someBytes = device.getUsbStringDescriptor(index).bString();
+            resultBytes = someBytes;
+            return resultBytes;
+
+        } catch (UsbPlatformException e) {
+            return null;
+        } catch (UsbException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     public static String decodeBCD(short bcd) {
