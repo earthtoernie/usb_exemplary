@@ -31,15 +31,34 @@ java {
     modularity.inferModulePath.set(true)
 }
 
+var currentOS = org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem();
+var platform: String = ""
+if (currentOS.isWindows) {
+    platform = "win"
+} else if (currentOS.isLinux) {
+    platform = "linux"
+} else if (currentOS.isFreeBSD) {
+    platform = "mac"
+}
+
 dependencies {
     implementation(project(":usbMiddle"))
+    implementation(project(":usbGui"))
+
+    implementation("org.openjfx:javafx-base:17.0.1:${platform}")
+    implementation("org.openjfx:javafx-controls:17.0.1:${platform}")
+    implementation ("org.openjfx:javafx-graphics:15.0.1:${platform}")
+    implementation("org.openjfx:javafx-fxml:15.0.1:${platform}")
+
     implementation("org.apache.commons:commons-lang3:3.12.0")
 }
 
 //The ‘run’ task is of type JavaExec
 application {
     mainModule.set("org.gradle.sample.app")
-    mainClass.set("org.gradle.sample.app.MainUsbPrettyList")
+//    mainClass.set("org.gradle.sample.app.MainUsbPrettyList")
+    mainClass.set("org.gradle.sample.app.Main")
+
 }
 
 

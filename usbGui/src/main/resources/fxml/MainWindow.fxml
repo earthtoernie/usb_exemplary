@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TreeView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<?import javafx.scene.layout.HBox?>
+<AnchorPane prefHeight="701.0" prefWidth="1060.0" xmlns="http://javafx.com/javafx/15.0.1"
+            xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+
+        <MenuBar prefHeight="29.0" prefWidth="1060.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                 AnchorPane.topAnchor="0.0">
+            <menus>
+                <Menu mnemonicParsing="false" text="File">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="Close"/>
+                        <MenuItem mnemonicParsing="false" text="Open"/>
+                        <!--                        <MenuItem mnemonicParsing="false" onAction="#addAccountAction" text="Add account" />-->
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Edit">
+                    <items>
+                        <!--                        <MenuItem mnemonicParsing="false" onAction="#optionsAction" text="Options" />-->
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Help">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="About"/>
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+        <TreeView fx:id="emailsTreeView" layoutY="27.0" prefHeight="674.0" prefWidth="246.0"
+                  AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="27.0"/>
+        <TableView fx:id="emailsTableView" layoutX="246.0" layoutY="28.0" prefHeight="233.0" prefWidth="809.0"
+                   AnchorPane.leftAnchor="246.0" AnchorPane.rightAnchor="200.0" AnchorPane.topAnchor="28.0">
+            <columns>
+                <TableColumn fx:id="senderCol" prefWidth="84.0" text="Sender"/>
+                <TableColumn fx:id="subjectCol" prefWidth="208.0" text="Subject"/>
+                <TableColumn fx:id="recipientCol" prefWidth="235.0" text="Recipient"/>
+                <TableColumn fx:id="sizeCol" prefWidth="123.0" text="Size"/>
+                <TableColumn fx:id="dateCol" prefWidth="140.0" text="Date"/>
+            </columns>
+        </TableView>
+        <StackPane fx:id="tempChartPane" alignment="TOP_LEFT" layoutX="246.0" layoutY="261.0" prefHeight="437.0"
+                   prefWidth="609.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="246.0"
+                   AnchorPane.rightAnchor="200.0" AnchorPane.topAnchor="261.0">
+            <children>
+                <LineChart fx:id="measurementsChartView">
+                    <xAxis>
+                        <CategoryAxis side="BOTTOM"/>
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis side="LEFT"/>
+                    </yAxis>
+                </LineChart>
+            </children>
+        </StackPane>
+        <VBox prefHeight="674.0" prefWidth="200.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="24.0">
+            <children>
+                <Label text="Go!Temp"></Label>
+
+                <ButtonBar buttonMinWidth="50.0" prefHeight="40.0" prefWidth="200.0">
+                    <buttons>
+                        <Button mnemonicParsing="false" text="start" onAction="#startMeasureButtonAction" />
+                        <Button mnemonicParsing="false" text="stop" onAction="#stopMeasureButtonAction" />
+                        <Button mnemonicParsing="false" text="reset" onAction="#resetMeasureButtonAction" />
+
+                    </buttons>
+                    <VBox.margin>
+                        <Insets right="3.0" top="10.0"/>
+                    </VBox.margin>
+                </ButtonBar>
+                <Label text="Random Walk"></Label>
+
+                <ButtonBar buttonMinWidth="50.0" prefHeight="40.0" prefWidth="200.0">
+                    <buttons>
+                        <Button mnemonicParsing="false" text="start" onAction="#startRandomButtonAction" />
+                        <Button mnemonicParsing="false" text="stop" onAction="#stopRandomButtonAction" />
+                        <Button mnemonicParsing="false" text="reset" onAction="#resetRandomButtonAction" />
+
+                    </buttons>
+                    <VBox.margin>
+                        <Insets right="3.0" top="10.0"/>
+                    </VBox.margin>
+                </ButtonBar>
+                <HBox>
+                    <Label fx:id="tempLabel" text="Temp C:">
+                        <padding>
+                            <Insets bottom="10.0" left="10.0"/>
+                        </padding>
+                    </Label>
+                    <Label fx:id="tempMeasurementField" text="N/A">
+                        <padding>
+                            <Insets bottom="10.0" left="10.0"/>
+                        </padding>
+                    </Label>
+                </HBox>
+                <ScrollPane>
+                    <content>
+                        <TableView prefWidth="175.0">
+                            <columns>
+                                <TableColumn prefWidth="75.0" text="Time"/>
+                                <TableColumn prefWidth="100" text="Temp C"/>
+                            </columns>
+                        </TableView>
+                    </content>
+                </ScrollPane>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

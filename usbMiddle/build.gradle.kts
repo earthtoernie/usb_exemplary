@@ -24,9 +24,3 @@ dependencies {
     implementation(project(":nativeResources"))
     implementation(project(":usbDb"))
 }
-
-
-//
-//test {
-//    useJUnitPlatform()
-//}

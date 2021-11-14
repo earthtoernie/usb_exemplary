@@ -8,7 +8,7 @@ buildSrc/build/
 usbMiddle/build/
 usbdb/build/
 nativeResources/build/
-gui/build/
+usbGui/build/
 usbDb/build/
 libusb4java.so
 libusb4java.dll
