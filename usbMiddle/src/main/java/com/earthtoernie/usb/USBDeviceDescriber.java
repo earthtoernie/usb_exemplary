@@ -48,39 +48,39 @@ public class USBDeviceDescriber {
     }
 
     public static void describe(UsbDevice device) throws UsbException, UnsupportedEncodingException {
-        System.out.println("hello world");
-//        UsbDeviceDescriptor descriptor = device.getUsbDeviceDescriptor();
-//        byte manufacturerCode = descriptor.iManufacturer();
-//        System.out.println("Manufacturer index: " + manufacturerCode);
-//        System.out.println("vendor string: " + getStringFromDb(device, UsbStringCode.MANUFACTURER_CODE));
-//        System.out.println("Manufacturer string: " + getStringNative(device, manufacturerCode));
-////        System.out.println("Manufacturer string: " + Arrays.toString(getBytesNative(device, manufacturerCode)));
-//
-//
-//        byte productCode = descriptor.iProduct();
-//        System.out.println("Product index: " + productCode);
-//        System.out.println("Product string: " + getStringFromDb(device, UsbStringCode.PRODUCT_CODE));
-//        System.out.println("Product string: " + getStringNative(device, productCode));
-////        System.out.println("Product string: " + Arrays.toString(getBytesNative(device, productCode)));
-//
-//
-//        byte serialCode = descriptor.iSerialNumber();
-//        System.out.println("Serial number index: " + serialCode);
-//        System.out.println("Serial number string: " + getStringFromDb(device, UsbStringCode.SERIAL_CODE));
-//        System.out.println("Serial number string: " + getStringNative(device, serialCode));
-//        System.out.println("Serial number string (bytes): " + Arrays.toString(getBytesNative(device, serialCode)));
-//
-//
-//        System.out.println("Vendor ID: 0x" + Integer.toHexString(Short.toUnsignedInt(descriptor.idVendor())));
-//        System.out.println("Product ID: 0x" + Integer.toHexString(Short.toUnsignedInt(descriptor.idProduct())));
-//        System.out.println("Class: " + descriptor.bDeviceClass()); // todo print this as an int
-//        System.out.println("Subclass: " + descriptor.bDeviceSubClass());
-//        System.out.println("Protocol: " + descriptor.bDeviceProtocol());
-//
-//        System.out.println("Device version: " + decodeBCD(descriptor.bcdDevice()));
-//        System.out.println("USB version: " + decodeBCD(descriptor.bcdUSB()));
-//        System.out.println("Maximum control packet size: " + descriptor.bMaxPacketSize0());
-//        System.out.println("Number of configurations:  " + descriptor.bNumConfigurations());
+//        System.out.println("hello world");
+        UsbDeviceDescriptor descriptor = device.getUsbDeviceDescriptor();
+        byte manufacturerCode = descriptor.iManufacturer();
+        System.out.println("Manufacturer index: " + manufacturerCode);
+        System.out.println("vendor string: " + getStringFromDb(device, UsbStringCode.MANUFACTURER_CODE));
+        System.out.println("Manufacturer string: " + getStringNative(device, manufacturerCode));
+//        System.out.println("Manufacturer string: " + Arrays.toString(getBytesNative(device, manufacturerCode)));
+
+
+        byte productCode = descriptor.iProduct();
+        System.out.println("Product index: " + productCode);
+        System.out.println("Product string: " + getStringFromDb(device, UsbStringCode.PRODUCT_CODE));
+        System.out.println("Product string: " + getStringNative(device, productCode));
+//        System.out.println("Product string: " + Arrays.toString(getBytesNative(device, productCode)));
+
+
+        byte serialCode = descriptor.iSerialNumber();
+        System.out.println("Serial number index: " + serialCode);
+        System.out.println("Serial number string: " + getStringFromDb(device, UsbStringCode.SERIAL_CODE));
+        System.out.println("Serial number string: " + getStringNative(device, serialCode));
+        System.out.println("Serial number string (bytes): " + Arrays.toString(getBytesNative(device, serialCode)));
+
+
+        System.out.println("Vendor ID: 0x" + Integer.toHexString(Short.toUnsignedInt(descriptor.idVendor())));
+        System.out.println("Product ID: 0x" + Integer.toHexString(Short.toUnsignedInt(descriptor.idProduct())));
+        System.out.println("Class: " + descriptor.bDeviceClass()); // todo print this as an int
+        System.out.println("Subclass: " + descriptor.bDeviceSubClass());
+        System.out.println("Protocol: " + descriptor.bDeviceProtocol());
+
+        System.out.println("Device version: " + decodeBCD(descriptor.bcdDevice()));
+        System.out.println("USB version: " + decodeBCD(descriptor.bcdUSB()));
+        System.out.println("Maximum control packet size: " + descriptor.bMaxPacketSize0());
+        System.out.println("Number of configurations:  " + descriptor.bNumConfigurations());
 
         System.out.println();
     }
