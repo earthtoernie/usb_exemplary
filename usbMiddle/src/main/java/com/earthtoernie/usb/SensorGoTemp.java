@@ -26,21 +26,16 @@ public class SensorGoTemp {
             UsbDevice goTemp = UsbUtils.getGoTemp();
             UsbConfiguration usbConfiguration = goTemp.getActiveUsbConfiguration();
             this.usbInterface = usbConfiguration.getUsbInterface((byte)0);
-            try {
-                usbInterface.claim(new UsbInterfacePolicy() {
-                    @Override
-                    public boolean forceClaim(UsbInterface usbInterface) {
-                        return true;
-                    }
-                });
-            } catch (UsbException e) {
-                e.printStackTrace();
-            }
             UsbEndpoint usbEndpoint = usbInterface.getUsbEndpoint((byte)0x81 );
             this.usbPipe = usbEndpoint.getUsbPipe();
             this.usbIrp = usbPipe.createUsbIrp();
             this.pipes = ImmutablePair.of(usbPipe, usbIrp);
             try {
+                usbInterface.claim(new UsbInterfacePolicy() {
+                    @Override
+                    public boolean forceClaim(UsbInterface usbInterface) {
+                        return true;
+                    }});
                 usbPipe.open();
             } catch (UsbException e) {
                 e.printStackTrace();
