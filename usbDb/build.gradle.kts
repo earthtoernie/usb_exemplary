@@ -17,14 +17,18 @@ tasks.register("z_downloadUsbIdFile"){
 // TODO check that database exists, to save time
 tasks.register("z_buildUsbIdDb") {
     dependsOn("z_downloadUsbIdFile")
+    val dbFileName = "usbids.db"
+    val sourceFileName = "usb.ids"
+    val sourceFile = Paths.get(buildDir.toString(), File(sourceFileName).toString())
+    val destFile = Paths.get(layout.projectDirectory.dir("src/main/resources").toString(), File(dbFileName).toString())
+
     doLast {
         val usbDbBuilder = com.earthtoernie.buildsrc.UsbDbBuilder()
-        val dbFileName = "usbids.db"
-        val sourceFileName = "usb.ids"
-        val sourceFile = Paths.get(buildDir.toString(), File(sourceFileName).toString())
-        val destFile = Paths.get(layout.projectDirectory.dir("src/main/resources").toString(), File(dbFileName).toString())
         usbDbBuilder.populateDB("jdbc:sqlite:$destFile", sourceFile.toString(), 200, false);
     }
+    inputs.file(sourceFile)
+    outputs.file(destFile)
+
 }
 
 tasks.classes {
