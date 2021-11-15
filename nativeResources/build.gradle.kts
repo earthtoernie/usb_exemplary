@@ -35,10 +35,11 @@ tasks.register<Copy>("z_downloadToPrepare") {
 }
 
 tasks.classes {
-    dependsOn("z_downloadToPrepare")
+    dependsOn("z_extractAll")
 }
 
 tasks.register<Copy>("z_extractAll") {
+    dependsOn("z_downloadToPrepare")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from(zipTree(layout.buildDirectory.dir("jars").get().toString() + "/libusb4java-1.3.0-linux-aarch64.jar"))
     exclude("META-INF/")
