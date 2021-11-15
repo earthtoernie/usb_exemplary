@@ -43,3 +43,6 @@ org.usb4java.Loader.class.getModule() --> usb4java.JNI
 Empty.class.getModule().isOpen("com.earthtoernie.bin", org.usb4java.Loader.class.getModule()) --> true
 Empty.class.getResource("/org/usb4java/linux-x86-64/libusb4java.so") -> works!
 ClassLoader.getSystemResource("org/usb4java/linux_x86_64/libusb4java.so")
+
+`SUBSYSTEMS=="usb", ATTR{idVendor}=="08f7", ATTR{idProduct}=="0002", GROUP="dialout", MODE="664"`
+`/etc/udev/rules.d/90-myusb.rules`
