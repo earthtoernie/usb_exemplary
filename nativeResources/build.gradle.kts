@@ -34,7 +34,7 @@ tasks.register<Copy>("z_downloadToPrepare") {
     into(layout.buildDirectory.dir("jars"))
 }
 
-tasks.classes {
+tasks.processResources {
     dependsOn("z_extractAll")
 }
 

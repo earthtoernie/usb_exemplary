@@ -28,7 +28,6 @@ abstract class DownloadUsbIdFile : DefaultTask() {
 //https://proandroiddev.com/the-new-way-of-writing-build-gradle-with-kotlin-dsl-script-8523710c9670
 val downloadUsbIdFile : TaskProvider<DownloadUsbIdFile> =tasks.register("downloadUsbIdFile", DownloadUsbIdFile::class)
 
-
 abstract class BuildUsbIdDb : DefaultTask() {
     @get:InputFile
     abstract val inputFile: RegularFileProperty
@@ -39,9 +38,6 @@ abstract class BuildUsbIdDb : DefaultTask() {
     init {
         inputFile.convention(project.objects.fileProperty().convention(project.layout.buildDirectory.file("usb.ids")));
         outputFile.convention(project.objects.fileProperty().convention(project.layout.projectDirectory.file("src/main/resources/usbids.db")));
-//        outputFile.convention(project.objects.fileProperty());
-
-
     }
 
     @TaskAction
@@ -60,10 +56,9 @@ abstract class BuildUsbIdDb : DefaultTask() {
 
 tasks.register("buildUsbIdDb", BuildUsbIdDb::class) {
     dependsOn("downloadUsbIdFile")
-//    inputFile = downloadUsbIdFile.get().outputFile
 }
 
-tasks.classes {
+tasks.processResources {
     dependsOn("buildUsbIdDb")
 }
 
