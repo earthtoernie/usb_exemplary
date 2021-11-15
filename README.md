@@ -46,3 +46,6 @@ ClassLoader.getSystemResource("org/usb4java/linux_x86_64/libusb4java.so")
 
 `SUBSYSTEMS=="usb", ATTR{idVendor}=="08f7", ATTR{idProduct}=="0002", GROUP="dialout", MODE="664"`
 `/etc/udev/rules.d/90-myusb.rules`
+
+how to reset git repo like it was just checked out
+`find . -path ./.git -prune -o -exec rm -rf {} \; 2> /dev/null`
