@@ -59,7 +59,12 @@ abstract class BuildUsbIdDb : DefaultTask() {
 
 
 tasks.register("buildUsbIdDb", BuildUsbIdDb::class) {
+    dependsOn("downloadUsbIdFile")
 //    inputFile = downloadUsbIdFile.get().outputFile
+}
+
+tasks.classes {
+    dependsOn("buildUsbIdDb")
 }
 
 
