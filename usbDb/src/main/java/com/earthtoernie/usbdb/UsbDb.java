@@ -35,8 +35,10 @@ public class UsbDb {
             ResultSet resultSet = selectVendorPreparedStatement.executeQuery();
             resultSet.next();
             return resultSet.getString("VENDOR");
-
-        } catch (SQLException | ClassNotFoundException e) {
+        }catch (SQLException | ClassNotFoundException e) {
+            if (e.getMessage().equals("ResultSet closed")) {
+                return null;
+            }
             e.printStackTrace();
         }
         return null;
@@ -52,7 +54,13 @@ public class UsbDb {
             selectVendorPreparedStatement.setInt(1, vid);
             ResultSet resultSetVendor = selectVendorPreparedStatement.executeQuery();
             resultSetVendor.next();
-            String vendor = resultSetVendor.getString("VENDOR");
+            String vendor = "** NOT FOUND **";
+            String product = "** NOT FOUND **";
+            if(!resultSetVendor.isClosed()) {
+                vendor = resultSetVendor.getString("VENDOR");
+            } else {
+                return ImmutablePair.of(vendor, product); // no table for vendor, so just return
+            }
             String vidString = getHexString(vid);
 
             PreparedStatement selectProductPreparedStatement =
@@ -60,7 +68,6 @@ public class UsbDb {
             selectProductPreparedStatement.setInt(1, pid);
             ResultSet resultSetProduct = selectProductPreparedStatement.executeQuery();
             resultSetProduct.next();
-            String product = "** NOT FOUND **";
             if(!resultSetProduct.isClosed()) {
                 // this throw if device id not found, so have to check isClosed
                 product = resultSetProduct.getString("PRODUCT");

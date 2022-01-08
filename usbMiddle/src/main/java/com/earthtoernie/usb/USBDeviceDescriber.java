@@ -53,7 +53,7 @@ public class USBDeviceDescriber {
         byte manufacturerCode = descriptor.iManufacturer();
         System.out.println("Manufacturer index: " + manufacturerCode);
         System.out.println("vendor string: " + getStringFromDb(device, UsbStringCode.MANUFACTURER_CODE));
-        System.out.println("Manufacturer string: " + getStringNative(device, manufacturerCode));
+        System.out.println("Manufacturer string: " + getStringNative(device, manufacturerCode));/////////// throws NegativeArraySizeException
 //        System.out.println("Manufacturer string: " + Arrays.toString(getBytesNative(device, manufacturerCode)));
 
 
@@ -110,6 +110,10 @@ public class USBDeviceDescriber {
             resultString =  "## UsbPlatformException" + e.getMessage().substring(30);
             return resultString;
         }
+        catch (NegativeArraySizeException e) {
+            resultString = "## NegativeArraySizeException, index must be > 2, index:" + index;
+            return resultString;
+        }
         catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (UsbException e) {
@@ -130,6 +134,8 @@ public class USBDeviceDescriber {
             return null;
         } catch (UsbException e) {
             e.printStackTrace();
+        }  catch (NegativeArraySizeException e) {
+            return null;
         }
 
         return null;
