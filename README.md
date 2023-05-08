@@ -1,5 +1,23 @@
 # Do all the usb things (with a gui too!). Fun with GRADLE :)
 
+This work is licensed under a
+[Creative Commons Attribution-ShareAlike 4.0 International License][cc-by-sa].
+
+[![CC BY-SA 4.0][cc-by-sa-image]][cc-by-sa]
+
+[cc-by-sa]: http://creativecommons.org/licenses/by-sa/4.0/
+[cc-by-sa-image]: https://licensebuttons.net/l/by-sa/4.0/88x31.png
+[cc-by-sa-shield]: https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey.svg
+
+
+## Citation
+(C) Ernie. earthtoernie
+
+[Java I/O, 2nd Edition](https://www.oreilly.com/library/view/java-io-2nd/0596527500/)
+
+[Rrciprocal frequency counter](https://forums.raspberrypi.com/viewtopic.php?t=306250)
+The guts of the "pio" code was copied from this thread, and slightly modified and translated from "micropython"
+
 - Started on a project to do a bunch of things with very custom USB
 devices, in Java. Experimented with JavaFX, which I really like working with.
 
