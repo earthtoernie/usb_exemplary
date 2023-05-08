@@ -15,9 +15,6 @@ This work is licensed under a
 
 [Java I/O, 2nd Edition](https://www.oreilly.com/library/view/java-io-2nd/0596527500/)
 
-[Rrciprocal frequency counter](https://forums.raspberrypi.com/viewtopic.php?t=306250)
-The guts of the "pio" code was copied from this thread, and slightly modified and translated from "micropython"
-
 - Started on a project to do a bunch of things with very custom USB
 devices, in Java. Experimented with JavaFX, which I really like working with.
 
