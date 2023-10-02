@@ -32,10 +32,10 @@ if (currentOS.isWindows) {
 }
 
 dependencies {
-    implementation("org.openjfx:javafx-base:17.0.1:${platform}")
-    implementation("org.openjfx:javafx-controls:17.0.1:${platform}")
-    implementation ("org.openjfx:javafx-graphics:15.0.1:${platform}")
-    implementation("org.openjfx:javafx-fxml:15.0.1:${platform}")
+    implementation("org.openjfx:javafx-base:21:${platform}")
+    implementation("org.openjfx:javafx-controls:21:${platform}")
+    implementation ("org.openjfx:javafx-graphics:21:${platform}")
+    implementation("org.openjfx:javafx-fxml:21:${platform}")
     implementation(project(":usbMiddle"))
     implementation("javax.usb:usb-api:1.0.2") {isTransitive = false}
 

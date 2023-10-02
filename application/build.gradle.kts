@@ -45,12 +45,12 @@ dependencies {
     implementation(project(":usbMiddle"))
     implementation(project(":usbGui"))
 
-    implementation("org.openjfx:javafx-base:17.0.1:${platform}")
-    implementation("org.openjfx:javafx-controls:17.0.1:${platform}")
-    implementation ("org.openjfx:javafx-graphics:15.0.1:${platform}")
-    implementation("org.openjfx:javafx-fxml:15.0.1:${platform}")
+    implementation("org.openjfx:javafx-base:21:${platform}")
+    implementation("org.openjfx:javafx-controls:21:${platform}")
+    implementation ("org.openjfx:javafx-graphics:21:${platform}")
+    implementation("org.openjfx:javafx-fxml:21:${platform}")
 
-    implementation("org.apache.commons:commons-lang3:3.12.0")
+    implementation("org.apache.commons:commons-lang3:3.13.0")
 }
 
 //The ‘run’ task is of type JavaExec
