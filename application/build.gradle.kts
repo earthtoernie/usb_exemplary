@@ -56,7 +56,8 @@ dependencies {
 //The ‘run’ task is of type JavaExec
 application {
     mainModule.set("org.gradle.sample.app")
-    mainClass.set("org.gradle.sample.app.MainUsbPrettyList")
+    mainClass.set("org.gradle.sample.app.MainUsbGui")
+//    mainClass.set("org.gradle.sample.app.MainUsbPrettyList")
 //    mainClass.set("org.gradle.sample.app.Main")
 
 }
