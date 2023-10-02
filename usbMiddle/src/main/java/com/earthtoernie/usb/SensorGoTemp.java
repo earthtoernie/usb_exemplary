@@ -1,5 +1,6 @@
 package com.earthtoernie.usb;
 
+import com.earthtoernie.usb.exceptions.UsbDeviceNotFoundException;
 import com.earthtoernie.usb.model.SensorMeasurement;
 
 import javax.usb.*;
@@ -23,7 +24,12 @@ public class SensorGoTemp {
         // private UsbDevice getGoTempDevice;
 
         GoTempUsbResource(){
-            UsbDevice goTemp = UsbUtils.getGoTemp();
+            UsbDevice goTemp = null;//TODO goTemp can be null
+            try {
+                goTemp = UsbUtils.getGoTemp();
+            } catch (UsbDeviceNotFoundException e) {
+                throw new RuntimeException(e);
+            }
             UsbConfiguration usbConfiguration = goTemp.getActiveUsbConfiguration();
             this.usbInterface = usbConfiguration.getUsbInterface((byte)0);
             UsbEndpoint usbEndpoint = usbInterface.getUsbEndpoint((byte)0x81 );

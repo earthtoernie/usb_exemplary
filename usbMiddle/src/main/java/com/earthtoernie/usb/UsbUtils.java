@@ -1,5 +1,6 @@
 package com.earthtoernie.usb;
 
+import com.earthtoernie.usb.exceptions.UsbDeviceNotFoundException;
 import com.earthtoernie.usbdb.UsbDb;
 
 import javax.usb.*;
@@ -90,8 +91,12 @@ public class UsbUtils {
         }
     }
 
-    protected static UsbDevice getGoTemp(){
+    protected static UsbDevice getGoTemp() throws UsbDeviceNotFoundException {
         UsbHub rootHub = getRootHub();
-        return searchDevices(rootHub);
+        var sensor = searchDevices(rootHub);
+        if (sensor == null) {
+            throw new UsbDeviceNotFoundException("no goTemp found");
+        }
+        return sensor;
     }
 }
