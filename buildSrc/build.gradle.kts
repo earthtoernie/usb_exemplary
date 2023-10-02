@@ -4,9 +4,9 @@ plugins {
 }
 
 dependencies {
-    implementation("org.ow2.asm:asm:8.0.1")
-    implementation("org.xerial:sqlite-jdbc:3.36.0.3")
-    implementation("org.apache.commons:commons-lang3:3.12.0")
+    implementation("org.ow2.asm:asm:9.4")
+    implementation("org.xerial:sqlite-jdbc:3.43.0.0")
+    implementation("org.apache.commons:commons-lang3:3.13.0")
     implementation("commons-io:commons-io:2.11.0")
 }
 
@@ -15,11 +15,13 @@ repositories {
     mavenCentral()
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "16"
-    }
-}
+// analogous to compileKotlin task, this whole block can be removed now
+//tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+//    kotlinOptions {
+//        jvmTarget = "17"
+//    }
+//
+//}
 
 gradlePlugin {
     plugins {
