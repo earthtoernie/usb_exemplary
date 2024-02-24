@@ -32,11 +32,17 @@ java {
 }
 
 var currentOS = org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem();
+val osArch = System.getProperty("os.arch")
+println("System Architecture**********: $osArch") // amd64 on ubuntu, aarch64 on raspi ubuntu
+
 var platform: String = ""
 if (currentOS.isWindows) {
     platform = "win"
 } else if (currentOS.isLinux) {
     platform = "linux"
+    if (osArch == "aarch64") {
+        platform = "linux-aarch64"
+    }
 } else if (currentOS.isFreeBSD) {
     platform = "mac"
 }

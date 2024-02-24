@@ -12,7 +12,7 @@ repositories {
 java {
     modularity.inferModulePath.set(true)
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
+        languageVersion.set(JavaLanguageVersion.of(21))
 //        https://blog.gradle.org/java-toolchains
 //        https://stackoverflow.com/questions/66450310/how-can-i-customize-a-kotlincompile-task-with-a-gradle-kotlin-buildsrc-plugin
     }

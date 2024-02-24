@@ -22,11 +22,17 @@ extraJavaModuleInfo {
 
 
 var currentOS = org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem();
+val osArch = System.getProperty("os.arch")
+println("System Architecture**********: $osArch")
 var platform: String = ""
 if (currentOS.isWindows) {
     platform = "win"
 } else if (currentOS.isLinux) {
     platform = "linux"
+    platform = "linux"
+    if (osArch == "aarch64") {
+        platform = "linux-aarch64"
+    }
 } else if (currentOS.isFreeBSD) {
     platform = "mac"
 }
