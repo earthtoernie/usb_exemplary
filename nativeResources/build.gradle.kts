@@ -6,7 +6,7 @@ version = "2.2.2"
 group = "org.usb4java"
 
 base {
-    archivesBaseName = "usb4JavaNative"
+    archivesName = "usb4JavaNative"
 }
 
 // not used

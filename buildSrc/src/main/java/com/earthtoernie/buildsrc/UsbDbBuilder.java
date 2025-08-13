@@ -17,14 +17,12 @@ public class UsbDbBuilder {
     private static final Pattern PID_LINE = Pattern.compile("^\\t([0-9a-fA-F]{4})\\s+(.*)");
 
     public int textCountVids(String usbIdsPath) {
-        try {
-            LineIterator it = FileUtils.lineIterator(new File(usbIdsPath), "UTF-8");
+        try (LineIterator it = FileUtils.lineIterator(new File(usbIdsPath), "UTF-8")) {
             int vidCount = 0;
             String lastVid = "";
             while (it.hasNext()) {
                 String line = it.nextLine();
                 Matcher matcherVid = VID_LINE.matcher(line);
-                // Matcher matcherPid = PID_LINE.matcher(line);
                 if (matcherVid.find()) {
                     String nextVid = matcherVid.group(1);
                     String vendor = matcherVid.group(2);
@@ -41,7 +39,6 @@ public class UsbDbBuilder {
     }
 
     public void populateDB(String jdbcUrl, String usbIdsPath, int maxPercent, boolean debugPrint) {
-//        usbIdsPath = "/var/lib/usbutils/usb.ids";
         Connection c = null;
         int totalVids = this.textCountVids(usbIdsPath);
         try {
@@ -51,21 +48,21 @@ public class UsbDbBuilder {
             statement.execute("PRAGMA SYNCHRONOUS=OFF"); // speeds up database a ton!, see https://blog.devart.com/increasing-sqlite-performance.html
             System.out.println("Opened database successfully");
 
-            LineIterator it = FileUtils.lineIterator(new File(usbIdsPath), "UTF-8");
-            int vidCount = 0;
+            // Using try-with-resources for LineIterator
+            try (LineIterator it = FileUtils.lineIterator(new File(usbIdsPath), "UTF-8")) {
+                int vidCount = 0;
 
-            Statement dropVidTableStatement = c.createStatement();
-            dropVidTableStatement.executeUpdate("DROP TABLE IF EXISTS VID_TABLE");
+                Statement dropVidTableStatement = c.createStatement();
+                dropVidTableStatement.executeUpdate("DROP TABLE IF EXISTS VID_TABLE");
 
-            Statement createVidTableStatement = c.createStatement();
-            String createVidTableString = "CREATE TABLE VID_TABLE " +
-                    "(ID INT PRIMARY KEY     NOT NULL," +
-                    " VID           TEXT     NOT NULL," +
-                    " VENDOR        TEXT     NOT NULL);";
-            createVidTableStatement.executeUpdate(createVidTableString);
+                Statement createVidTableStatement = c.createStatement();
+                String createVidTableString = "CREATE TABLE VID_TABLE " +
+                        "(ID INT PRIMARY KEY     NOT NULL," +
+                        " VID           TEXT     NOT NULL," +
+                        " VENDOR        TEXT     NOT NULL);";
+                createVidTableStatement.executeUpdate(createVidTableString);
 
-            String lastVid = "";
-            try {
+                String lastVid = "";
                 while (it.hasNext()) {
                     String line = it.nextLine();
                     Matcher matcherVid = VID_LINE.matcher(line);
@@ -116,10 +113,9 @@ public class UsbDbBuilder {
 
                     }
                 }
+                // No need for finally block with closeQuietly - try-with-resources handles closing
             } catch(NoSuchElementException ex) {
                 ex.printStackTrace();
-            }finally {
-                LineIterator.closeQuietly(it);
             }
         } catch (SQLException | IOException | ClassNotFoundException e) {
             System.err.println(e);
