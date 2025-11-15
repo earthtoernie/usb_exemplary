@@ -51,10 +51,10 @@ dependencies {
     implementation(project(":usbMiddle"))
     implementation(project(":usbGui"))
 
-    implementation("org.openjfx:javafx-base:21:${platform}")
-    implementation("org.openjfx:javafx-controls:21:${platform}")
-    implementation ("org.openjfx:javafx-graphics:21:${platform}")
-    implementation("org.openjfx:javafx-fxml:21:${platform}")
+    implementation("org.openjfx:javafx-base:25:${platform}")
+    implementation("org.openjfx:javafx-controls:25:${platform}")
+    implementation ("org.openjfx:javafx-graphics:25:${platform}")
+    implementation("org.openjfx:javafx-fxml:25:${platform}")
 
     implementation("org.apache.commons:commons-lang3:3.13.0")
 }
