@@ -9,6 +9,8 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.LineChart;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -20,6 +22,20 @@ public class MainWindowController extends BaseController implements Initializabl
 
     @FXML
     LineChart<String, Double> measurementsChartView;
+
+    @FXML
+    void aboutAction(ActionEvent event) {
+        String javaVersion = System.getProperty("java.version");
+        String javaRuntime = System.getProperty("java.runtime.name");
+        String vmVersion = System.getProperty("java.vm.version");
+        String vendor = System.getProperty("java.vendor");
+        String message = String.format("Java: %s\nRuntime: %s\nVM: %s\nVendor: %s", javaVersion, javaRuntime, vmVersion, vendor);
+        Alert alert = new Alert(AlertType.INFORMATION);
+        alert.setTitle("About");
+        alert.setHeaderText("Application Information");
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
 
     @FXML
     void startMeasureButtonAction(ActionEvent event) {
