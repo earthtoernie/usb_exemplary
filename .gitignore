@@ -16,4 +16,5 @@ nativeResources/src/main/resources/org/
 usbIds.db
 *.db
 *.db-journal
-build/reports/problems/
+build/reports/problems/problems-report.html
+

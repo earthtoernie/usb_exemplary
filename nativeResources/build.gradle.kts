@@ -10,23 +10,21 @@ base {
 }
 
 // not used
-ext {
-    set("baseFiles", listOf("com/thirdparty/base/**"))
-    set("extFiles", listOf("com/thirdparty/ext/**"))
-}
+val baseFiles: List<String> = listOf("com/thirdparty/base/**")
+val extFiles: List<String> = listOf("com/thirdparty/ext/**")
 
 tasks.withType<Jar> {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    excludes.addAll(ext.get("extFiles") as Collection<String>)
-    from(zipTree(layout.buildDirectory.dir("jars").get().toString() + "/usb4java-1.3.0.jar"))
+    excludes.addAll(extFiles)
+    from(zipTree(layout.buildDirectory.dir("jars").get().asFile.resolve("usb4java-1.3.0.jar")))
 }
 
 
-tasks.create("z_buildExt", Jar::class) {
+tasks.register<Jar>("z_buildExt") {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    excludes.addAll(ext.get("baseFiles") as Collection<String>)
-    from(sourceSets.main.get().output.classesDirs) // <-- HERE
-    from(zipTree(layout.buildDirectory.dir("jars").get().toString() + "/usb4java-1.3.0.jar"))
+    excludes.addAll(baseFiles)
+    from(sourceSets.main.get().output.classesDirs)
+    from(zipTree(layout.buildDirectory.dir("jars").get().asFile.resolve("usb4java-1.3.0.jar")))
 }
 // this one copies files to "jars"
 tasks.register<Copy>("z_downloadToPrepare") {
@@ -41,28 +39,28 @@ tasks.processResources {
 tasks.register<Copy>("z_extractAll") {
     dependsOn("z_downloadToPrepare")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from(zipTree(layout.buildDirectory.dir("jars").get().toString() + "/libusb4java-1.3.0-linux-aarch64.jar"))
+    from(zipTree(layout.buildDirectory.dir("jars").get().asFile.resolve("libusb4java-1.3.0-linux-aarch64.jar")))
     exclude("META-INF/")
     into(layout.projectDirectory.dir("src/main/resources"))
-    from(zipTree(layout.buildDirectory.dir("jars").get().toString() + "/libusb4java-1.3.0-linux-arm.jar"))
+    from(zipTree(layout.buildDirectory.dir("jars").get().asFile.resolve("libusb4java-1.3.0-linux-arm.jar")))
     exclude("META-INF/")
     into(layout.projectDirectory.dir("src/main/resources"))
-    from(zipTree(layout.buildDirectory.dir("jars").get().toString() + "/libusb4java-1.3.0-linux-x86-64.jar"))
+    from(zipTree(layout.buildDirectory.dir("jars").get().asFile.resolve("libusb4java-1.3.0-linux-x86-64.jar")))
     exclude("META-INF/")
     into(layout.projectDirectory.dir("src/main/resources"))
-    from(zipTree(layout.buildDirectory.dir("jars").get().toString() + "/libusb4java-1.3.0-win32-x86-64.jar"))
+    from(zipTree(layout.buildDirectory.dir("jars").get().asFile.resolve("libusb4java-1.3.0-win32-x86-64.jar")))
     exclude("META-INF/")
     into(layout.projectDirectory.dir("src/main/resources"))
-
 }
+
 val downloadOnly: Configuration by configurations.creating
 //https://docs.gradle.org/current/userguide/migrating_from_groovy_to_kotlin_dsl.html#configurations-and-dependencies
 dependencies {
-    downloadOnly ("org.usb4java:libusb4java:1.3.0:linux-aarch64") {isTransitive = false}
-    downloadOnly ("org.usb4java:libusb4java:1.3.0:linux-arm") {isTransitive = false}
-    downloadOnly ("org.usb4java:libusb4java:1.3.0:linux-x86-64") {isTransitive = false}
-    downloadOnly ("org.usb4java:libusb4java:1.3.0:win32-x86-64") {isTransitive = false}
-    downloadOnly ("org.usb4java:usb4java:1.3.0") {isTransitive = false}
+    downloadOnly("org.usb4java:libusb4java:1.3.0:linux-aarch64") { isTransitive = false }
+    downloadOnly("org.usb4java:libusb4java:1.3.0:linux-arm") { isTransitive = false }
+    downloadOnly("org.usb4java:libusb4java:1.3.0:linux-x86-64") { isTransitive = false }
+    downloadOnly("org.usb4java:libusb4java:1.3.0:win32-x86-64") { isTransitive = false }
+    downloadOnly("org.usb4java:usb4java:1.3.0") { isTransitive = false }
 }
 
 // source roots

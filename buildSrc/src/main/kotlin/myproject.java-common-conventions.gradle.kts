@@ -24,8 +24,11 @@ java {
 //    }
 //}
 
-tasks.test {
+// Apply to all tests
+tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+    // Silence sqlite-jdbc native access warning
+    jvmArgs("--enable-native-access=ALL-UNNAMED")
 }
 
 dependencies {

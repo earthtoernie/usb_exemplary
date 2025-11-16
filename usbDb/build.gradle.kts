@@ -1,4 +1,4 @@
-import java.nio.file.Paths;
+import java.nio.file.Paths
 
 plugins {
     id("myproject.java-library-conventions")
@@ -11,22 +11,20 @@ abstract class DownloadUsbIdFile : DefaultTask() {
     abstract val outputFile: RegularFileProperty
 
     init {
-        outputFile.convention(project.objects.fileProperty().convention(project.layout.buildDirectory.file("usb.ids")));
+        outputFile.convention(project.objects.fileProperty().convention(project.layout.buildDirectory.file("usb.ids")))
     }
 
     @TaskAction
     fun downloadUsbIds() {
-        val fileName = "usb.ids"
         val sourceUrl = "http://www.linux-usb.org/usb.ids"
-        val destFile = Paths.get(project.layout.buildDirectory.get().toString(), File(fileName).toString())
-
+        val destFile = outputFile.get().asFile
         ant.invokeMethod("get", mapOf("src" to sourceUrl, "dest" to destFile))
     }
 }
 
 //https://github.com/gradle/kotlin-dsl-samples/blob/master/samples/task-dependencies/build.gradle.kts
 //https://proandroiddev.com/the-new-way-of-writing-build-gradle-with-kotlin-dsl-script-8523710c9670
-val downloadUsbIdFile : TaskProvider<DownloadUsbIdFile> =tasks.register("downloadUsbIdFile", DownloadUsbIdFile::class)
+val downloadUsbIdFile: TaskProvider<DownloadUsbIdFile> = tasks.register("downloadUsbIdFile", DownloadUsbIdFile::class)
 
 abstract class BuildUsbIdDb : DefaultTask() {
     @get:InputFile
@@ -36,26 +34,23 @@ abstract class BuildUsbIdDb : DefaultTask() {
     abstract val outputFile: RegularFileProperty
 
     init {
-        inputFile.convention(project.objects.fileProperty().convention(project.layout.buildDirectory.file("usb.ids")));
-        outputFile.convention(project.objects.fileProperty().convention(project.layout.projectDirectory.file("src/main/resources/usbids.db")));
+        inputFile.convention(project.objects.fileProperty().convention(project.layout.buildDirectory.file("usb.ids")))
+        outputFile.convention(project.objects.fileProperty().convention(project.layout.projectDirectory.file("src/main/resources/usbids.db")))
     }
 
     @TaskAction
     fun buildDb() {
-        val dbFileName = "usbids.db"
-        val sourceFileName = "usb.ids"
-        val destFile = Paths.get(project.layout.projectDirectory.dir("src/main/resources").toString(), File(dbFileName).toString())
-
-        val sourceFile = Paths.get(project.layout.buildDirectory.get().toString(), File(sourceFileName).toString())
+        val destFile = outputFile.get().asFile.toPath()
+        val sourceFile = inputFile.get().asFile.toPath()
 
         val usbDbBuilder = com.earthtoernie.buildsrc.UsbDbBuilder()
-        usbDbBuilder.populateDB("jdbc:sqlite:$destFile", sourceFile.toString(), 200, false);
+        usbDbBuilder.populateDB("jdbc:sqlite:$destFile", sourceFile.toString(), 200, false)
     }
 }
 
 
 tasks.register("buildUsbIdDb", BuildUsbIdDb::class) {
-    dependsOn("downloadUsbIdFile")
+    dependsOn(downloadUsbIdFile)
 }
 
 tasks.processResources {
@@ -67,16 +62,13 @@ tasks.register("z_countVendors") {
     dependsOn("z_downloadUsbIdFile")
     doLast {
         val usbDbBuilder = com.earthtoernie.buildsrc.UsbDbBuilder()
-        // val dbFileName = "usbids.db"
-        val sourceFileName = "usb.ids"
-        val sourceFile = Paths.get(buildDir.toString(), File(sourceFileName).toString())
-        // val destFile = Paths.get(buildDir.toString(), File(dbFileName).toString())
-        val vendorCount = usbDbBuilder.textCountVids(sourceFile.toString());
+        val sourceFile = project.layout.buildDirectory.file("usb.ids").get().asFile.toPath()
+        val vendorCount = usbDbBuilder.textCountVids(sourceFile.toString())
         println("**********: vendors found: $vendorCount")
     }
 }
 
-fun download(url : String, destFile : String){
+fun download(url: String, destFile: String) {
     ant.invokeMethod("get", mapOf("src" to url, "dest" to destFile))
 }
 
