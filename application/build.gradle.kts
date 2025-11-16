@@ -56,7 +56,7 @@ dependencies {
     implementation ("org.openjfx:javafx-graphics:25:${platform}")
     implementation("org.openjfx:javafx-fxml:25:${platform}")
 
-    implementation("org.apache.commons:commons-lang3:3.13.0")
+    implementation("org.apache.commons:commons-lang3:3.17.0")
 }
 
 //The ‘run’ task is of type JavaExec
