@@ -38,6 +38,12 @@
                         <!--                        <MenuItem mnemonicParsing="false" onAction="#optionsAction" text="Options" />-->
                     </items>
                 </Menu>
+                <!-- Added USB menu with database item -->
+                <Menu mnemonicParsing="false" text="USB">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="database" onAction="#databaseAction" />
+                    </items>
+                </Menu>
                 <Menu mnemonicParsing="false" text="Help">
                     <items>
                         <MenuItem mnemonicParsing="false" text="About" onAction="#aboutAction"/>

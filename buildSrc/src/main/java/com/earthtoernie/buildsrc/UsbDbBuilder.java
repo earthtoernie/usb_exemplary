@@ -38,6 +38,14 @@ public class UsbDbBuilder {
         return 0;
     }
 
+    /**
+     * Populates a SQLite database with vendor and product information from the USB IDs file.
+     *
+     * @param jdbcUrl    The JDBC URL for the SQLite database.
+     * @param usbIdsPath The path to the USB IDs file.
+     * @param maxPercent The maximum percentage of the file to process before stopping.
+     * @param debugPrint If true, debug information will be printed to the console.
+     */
     public void populateDB(String jdbcUrl, String usbIdsPath, int maxPercent, boolean debugPrint) {
         Connection c = null;
         int totalVids = this.textCountVids(usbIdsPath);

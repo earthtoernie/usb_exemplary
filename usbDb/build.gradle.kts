@@ -74,6 +74,6 @@ fun download(url: String, destFile: String) {
 
 dependencies {
     implementation("org.xerial:sqlite-jdbc:3.46.0.0")
-    implementation("org.apache.commons:commons-lang3:3.17.0")
+    implementation("org.apache.commons:commons-lang3:3.19.0")
     implementation("commons-io:commons-io:2.16.1")
 }
