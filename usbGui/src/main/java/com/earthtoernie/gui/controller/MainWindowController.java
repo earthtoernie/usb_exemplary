@@ -113,96 +113,10 @@ public class MainWindowController extends BaseController implements Initializabl
                     return;
                 }
 
-                List<TableDump> dumps = new ArrayList<>();
-
-                try (Connection conn = DriverManager.getConnection(jdbcUrl)) {
-                    // Use separate Statements for nested queries so one ResultSet doesn't get closed by another
-                    try (Statement tablesStmt = conn.createStatement();
-                         ResultSet tables = tablesStmt.executeQuery("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;")) {
-                        while (tables.next()) {
-                            String table = tables.getString("name");
-
-                            // Skip internal SQLite metadata tables which aren't relevant for listing
-                            if (table.startsWith("sqlite_")) {
-                                continue;
-                            }
-
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("Table: ").append(table).append('\n');
-
-                            int rowCount = 0;
-                            try {
-                                // Get column names using a dedicated Statement
-                                List<String> cols = new ArrayList<>();
-                                try (Statement colsStmt = conn.createStatement();
-                                     ResultSet colsRs = colsStmt.executeQuery("PRAGMA table_info('" + table + "');")) {
-                                    while (colsRs.next()) {
-                                        cols.add(colsRs.getString("name"));
-                                    }
-                                }
-
-                                // CSV header row (columns)
-                                for (int i = 0; i < cols.size(); i++) {
-                                    if (i > 0) sb.append(',');
-                                    sb.append(csvEscape(cols.get(i)));
-                                }
-                                sb.append('\n');
-
-                                // Rows using a dedicated Statement
-                                try (Statement rowsStmt = conn.createStatement();
-                                     ResultSet rows = rowsStmt.executeQuery("SELECT * FROM \"" + table + "\";")) {
-                                    while (rows.next()) {
-                                        for (int i = 0; i < cols.size(); i++) {
-                                            if (i > 0) sb.append(',');
-                                            String val = rows.getString(cols.get(i));
-                                            sb.append(csvEscape(val));
-                                        }
-                                        sb.append('\n');
-                                        rowCount++;
-                                    }
-                                }
-
-                                // Append row count summary
-                                sb.append("# rows: ").append(rowCount).append('\n');
-                            } catch (Exception tableEx) {
-                                sb.append("Error processing table ").append(table).append(": ").append(tableEx.getMessage()).append('\n');
-                                StringWriter sw = new StringWriter();
-                                tableEx.printStackTrace(new PrintWriter(sw));
-                                sb.append(sw.toString()).append('\n');
-                            }
-
-                            // Lookup vendor name for this table (if it's a vendor table). Try by VID text first, then by numeric id.
-                            String vendorName = "";
-                            try {
-                                if (!"VID_TABLE".equalsIgnoreCase(table)) {
-                                    try (PreparedStatement vendorStmt = conn.prepareStatement("SELECT VENDOR FROM VID_TABLE WHERE VID=?")) {
-                                        vendorStmt.setString(1, table);
-                                        try (ResultSet vr = vendorStmt.executeQuery()) {
-                                            if (vr.next()) {
-                                                vendorName = vr.getString("VENDOR");
-                                            }
-                                        }
-                                    }
-                                    // If not found by VID string, try by numeric id (hex -> int)
-                                    if (vendorName.isEmpty()) {
-                                        try (PreparedStatement vendorStmt2 = conn.prepareStatement("SELECT VENDOR FROM VID_TABLE WHERE id=?")) {
-                                            vendorStmt2.setInt(1, Integer.parseInt(table, 16));
-                                            try (ResultSet vr2 = vendorStmt2.executeQuery()) {
-                                                if (vr2.next()) {
-                                                    vendorName = vr2.getString("VENDOR");
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            } catch (Exception ex) {
-                                // ignore lookup errors - vendorName will remain empty
-                            }
-
-                            // include rowCount and vendorName in the dump so the UI can show vendor next to the row count
-                            dumps.add(new TableDump(table, sb.toString(), rowCount, vendorName));
-                        }
-                    }
+                // Use helper to load database dumps
+                List<TableDump> dumps;
+                try {
+                    dumps = loadDatabaseDumps(jdbcUrl);
                 } catch (SQLException e) {
                     Alert err = new Alert(AlertType.ERROR, "Error reading database: " + e.getMessage());
                     err.showAndWait();
@@ -215,22 +129,8 @@ public class MainWindowController extends BaseController implements Initializabl
                     return;
                 }
 
-                // Build a TabPane with one tab per table to show full contents in separate, scrollable TextAreas
-                TabPane tabPane = new TabPane();
-                for (TableDump td : dumps) {
-                    Tab tab = new Tab();
-                    // Title: table name + (N items) + optional vendor name
-                    String title = td.name + " (" + td.rowCount + " items" + (td.vendorName != null && !td.vendorName.isEmpty() ? " - " + td.vendorName : "") + ")";
-                    tab.setText(title);
-                    TextArea ta = new TextArea(td.content);
-                    ta.setEditable(false);
-                    ta.setWrapText(false);
-                    ta.setPrefWidth(1000);
-                    ta.setPrefHeight(700);
-                    tab.setContent(ta);
-                    tab.setClosable(false);
-                    tabPane.getTabs().add(tab);
-                }
+                // Build UI via helper and show it
+                TabPane tabPane = buildDatabaseTabPane(dumps);
 
                 Stage stage = new Stage();
                 stage.initModality(Modality.APPLICATION_MODAL);
@@ -259,6 +159,126 @@ public class MainWindowController extends BaseController implements Initializabl
         var allMeasurements = measurementsHolder.getMeasurementsObservable();
         measurementsChartView.setData(allMeasurements);
         this.measurementsHolder = measurementsHolder;
+    }
+
+    // Helper that reads the DB and constructs a list of table dumps with row counts and optional vendor names
+    List<TableDump> loadDatabaseDumps(String jdbcUrl) throws SQLException {
+        List<TableDump> dumps = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(jdbcUrl)) {
+            try (Statement tablesStmt = conn.createStatement();
+                 ResultSet tables = tablesStmt.executeQuery("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;")) {
+                while (tables.next()) {
+                    String table = tables.getString("name");
+
+                    if (table.startsWith("sqlite_")) {
+                        continue; // skip internal tables
+                    }
+
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Table: ").append(table).append('\n');
+
+                    int rowCount = 0;
+                    try {
+                        // Get column names
+                        List<String> cols = new ArrayList<>();
+                        try (Statement colsStmt = conn.createStatement();
+                             ResultSet colsRs = colsStmt.executeQuery("PRAGMA table_info('" + table + "');")) {
+                            while (colsRs.next()) {
+                                cols.add(colsRs.getString("name"));
+                            }
+                        }
+
+                        // CSV header row
+                        for (int i = 0; i < cols.size(); i++) {
+                            if (i > 0) sb.append(',');
+                            sb.append(csvEscape(cols.get(i)));
+                        }
+                        sb.append('\n');
+
+                        // Rows
+                        try (Statement rowsStmt = conn.createStatement();
+                             ResultSet rows = rowsStmt.executeQuery("SELECT * FROM \"" + table + "\";")) {
+                            while (rows.next()) {
+                                for (int i = 0; i < cols.size(); i++) {
+                                    if (i > 0) sb.append(',');
+                                    String val = rows.getString(cols.get(i));
+                                    sb.append(csvEscape(val));
+                                }
+                                sb.append('\n');
+                                rowCount++;
+                            }
+                        }
+
+                        // Append row count summary
+                        sb.append("# rows: ").append(rowCount).append('\n');
+                    } catch (Exception tableEx) {
+                        sb.append("Error processing table ").append(table).append(": ").append(tableEx.getMessage()).append('\n');
+                        StringWriter sw = new StringWriter();
+                        tableEx.printStackTrace(new PrintWriter(sw));
+                        sb.append(sw).append('\n');
+                    }
+
+                    // Lookup vendor name for this table (if it's a vendor table)
+                    String vendorName = "";
+                    try {
+                        if (!"VID_TABLE".equalsIgnoreCase(table)) {
+                            try (PreparedStatement vendorStmt = conn.prepareStatement("SELECT VENDOR FROM VID_TABLE WHERE VID=?")) {
+                                vendorStmt.setString(1, table);
+                                try (ResultSet vr = vendorStmt.executeQuery()) {
+                                    if (vr.next()) {
+                                        vendorName = vr.getString("VENDOR");
+                                    }
+                                }
+                            }
+                            if (vendorName.isEmpty()) {
+                                try (PreparedStatement vendorStmt2 = conn.prepareStatement("SELECT VENDOR FROM VID_TABLE WHERE id=?")) {
+                                    vendorStmt2.setInt(1, Integer.parseInt(table, 16));
+                                    try (ResultSet vr2 = vendorStmt2.executeQuery()) {
+                                        if (vr2.next()) {
+                                            vendorName = vr2.getString("VENDOR");
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } catch (Exception ignore) {
+                        // leave vendorName empty if lookup fails
+                    }
+
+                    dumps.add(new TableDump(table, sb.toString(), rowCount, vendorName));
+                }
+            }
+        }
+        return dumps;
+    }
+
+    // Helper that builds the TabPane UI from table dumps
+    TabPane buildDatabaseTabPane(List<TableDump> dumps) {
+        TabPane tabPane = new TabPane();
+        for (TableDump td : dumps) {
+            Tab tab = new Tab();
+            tab.setText(buildTabTitle(td));
+            TextArea ta = new TextArea(td.content);
+            ta.setEditable(false);
+            ta.setWrapText(false);
+            ta.setPrefWidth(1000);
+            ta.setPrefHeight(700);
+            tab.setContent(ta);
+            tab.setClosable(false);
+            tabPane.getTabs().add(tab);
+        }
+        return tabPane;
+    }
+
+    // Helper that builds a tab title string from a dump (easy to unit test)
+    static String buildTabTitle(TableDump td) {
+        return buildTabTitle(td.name, td.rowCount, td.vendorName);
+    }
+
+    // Overload for tests and general formatting without needing TableDump
+    static String buildTabTitle(String name, int rowCount, String vendorName) {
+        String vn = (vendorName != null && !vendorName.isEmpty()) ? " - " + vendorName : "";
+        return name + " (" + rowCount + " items" + vn + ")";
     }
 
     private static class TableDump {
