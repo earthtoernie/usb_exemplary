@@ -4,6 +4,7 @@ module com.earthtoernie.usbdb {
     requires org.apache.commons.lang3;
     requires org.apache.commons.io;
     requires org.xerial.sqlitejdbc;
+    requires org.apache.commons.compress;
 
 //    requires javax.usb.API; //    requires usb.api; (maybe it should be?)
 //    requires usb4java.IMPL;
