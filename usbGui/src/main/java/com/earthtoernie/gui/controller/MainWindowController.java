@@ -8,13 +8,20 @@ import com.earthtoernie.gui.view.ViewFactory;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 import java.net.URL;
+import java.io.StringWriter;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -91,9 +98,8 @@ public class MainWindowController extends BaseController implements Initializabl
         var result = alert.showAndWait();
         result.ifPresent(bt -> {
             if (bt == printBtn) {
-                // Read the sqlite database bundled on the classpath and display its entire contents in a dialog
+                // Read the sqlite database bundled on the classpath and display its entire contents
                 String resourceName = "usbids.db"; // resource path on the classpath root
-                StringBuilder sb = new StringBuilder();
 
                 // Use the SQLite classpath resource URL so the packaged DB (in usbDb's resources) is used
                 String jdbcUrl = "jdbc:sqlite::resource:" + resourceName;
@@ -101,64 +107,106 @@ public class MainWindowController extends BaseController implements Initializabl
                     // Ensure SQLite driver is available at runtime
                     Class.forName("org.sqlite.JDBC");
                 } catch (ClassNotFoundException e) {
-                    sb.append("SQLite JDBC driver not found: ").append(e.getMessage()).append('\n');
+                    Alert err = new Alert(AlertType.ERROR, "SQLite JDBC driver not found: " + e.getMessage());
+                    err.showAndWait();
+                    return;
                 }
+
+                List<TableDump> dumps = new ArrayList<>();
 
                 try (Connection conn = DriverManager.getConnection(jdbcUrl)) {
-                    Statement stmt = conn.createStatement();
-                    // Get list of tables
-                    ResultSet tables = stmt.executeQuery("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;");
-                    while (tables.next()) {
-                        String table = tables.getString("name");
-                        sb.append("Table: ").append(table).append('\n');
+                    // Use separate Statements for nested queries so one ResultSet doesn't get closed by another
+                    try (Statement tablesStmt = conn.createStatement();
+                         ResultSet tables = tablesStmt.executeQuery("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;")) {
+                        while (tables.next()) {
+                            String table = tables.getString("name");
 
-                        // Get column names
-                        List<String> cols = new ArrayList<>();
-                        ResultSet colsRs = stmt.executeQuery("PRAGMA table_info('" + table + "');");
-                        while (colsRs.next()) {
-                            cols.add(colsRs.getString("name"));
-                        }
-                        colsRs.close();
-
-                        // Header row
-                        for (int i = 0; i < cols.size(); i++) {
-                            if (i > 0) sb.append(" | ");
-                            sb.append(cols.get(i));
-                        }
-                        sb.append('\n');
-
-                        // Rows
-                        ResultSet rows = stmt.executeQuery("SELECT * FROM \"" + table + "\";");
-                        while (rows.next()) {
-                            for (int i = 0; i < cols.size(); i++) {
-                                if (i > 0) sb.append(" | ");
-                                String val = rows.getString(cols.get(i));
-                                sb.append(val == null ? "NULL" : val);
+                            // Skip internal SQLite metadata tables which aren't relevant for listing
+                            if (table.startsWith("sqlite_")) {
+                                continue;
                             }
-                            sb.append('\n');
+
+                            StringBuilder sb = new StringBuilder();
+                            sb.append("Table: ").append(table).append('\n');
+
+                            try {
+                                // Get column names using a dedicated Statement
+                                List<String> cols = new ArrayList<>();
+                                try (Statement colsStmt = conn.createStatement();
+                                     ResultSet colsRs = colsStmt.executeQuery("PRAGMA table_info('" + table + "');")) {
+                                    while (colsRs.next()) {
+                                        cols.add(colsRs.getString("name"));
+                                    }
+                                }
+
+                                // CSV header row (columns)
+                                for (int i = 0; i < cols.size(); i++) {
+                                    if (i > 0) sb.append(',');
+                                    sb.append(csvEscape(cols.get(i)));
+                                }
+                                sb.append('\n');
+
+                                // Rows using a dedicated Statement
+                                int rowCount = 0;
+                                try (Statement rowsStmt = conn.createStatement();
+                                     ResultSet rows = rowsStmt.executeQuery("SELECT * FROM \"" + table + "\";")) {
+                                    while (rows.next()) {
+                                        for (int i = 0; i < cols.size(); i++) {
+                                            if (i > 0) sb.append(',');
+                                            String val = rows.getString(cols.get(i));
+                                            sb.append(csvEscape(val));
+                                        }
+                                        sb.append('\n');
+                                        rowCount++;
+                                    }
+                                }
+
+                                // Append row count summary
+                                sb.append("# rows: ").append(rowCount).append('\n');
+                            } catch (Exception tableEx) {
+                                sb.append("Error processing table ").append(table).append(": ").append(tableEx.getMessage()).append('\n');
+                                StringWriter sw = new StringWriter();
+                                tableEx.printStackTrace(new PrintWriter(sw));
+                                sb.append(sw.toString()).append('\n');
+                            }
+
+                            dumps.add(new TableDump(table, sb.toString()));
                         }
-                        rows.close();
-                        sb.append('\n');
                     }
-                    tables.close();
-                    stmt.close();
                 } catch (SQLException e) {
-                    sb.append("Error reading database: ").append(e.getMessage()).append('\n');
-                    e.printStackTrace();
+                    Alert err = new Alert(AlertType.ERROR, "Error reading database: " + e.getMessage());
+                    err.showAndWait();
+                    return;
                 }
 
-                // Show the results in an information dialog with expandable text area
-                Alert info = new Alert(AlertType.INFORMATION);
-                info.setTitle("USB Database Contents");
-                info.setHeaderText("Contents of resource: " + resourceName);
-                TextArea ta = new TextArea(sb.toString());
-                ta.setEditable(false);
-                ta.setWrapText(false);
-                ta.setPrefWidth(800);
-                ta.setPrefHeight(600);
-                info.getDialogPane().setExpandableContent(ta);
-                info.getDialogPane().setExpanded(true);
-                info.showAndWait();
+                if (dumps.isEmpty()) {
+                    Alert info = new Alert(AlertType.INFORMATION, "No tables found in resource: " + resourceName);
+                    info.showAndWait();
+                    return;
+                }
+
+                // Build a TabPane with one tab per table to show full contents in separate, scrollable TextAreas
+                TabPane tabPane = new TabPane();
+                for (TableDump td : dumps) {
+                    Tab tab = new Tab();
+                    tab.setText(td.name);
+                    TextArea ta = new TextArea(td.content);
+                    ta.setEditable(false);
+                    ta.setWrapText(false);
+                    ta.setPrefWidth(1000);
+                    ta.setPrefHeight(700);
+                    tab.setContent(ta);
+                    tab.setClosable(false);
+                    tabPane.getTabs().add(tab);
+                }
+
+                Stage stage = new Stage();
+                stage.initModality(Modality.APPLICATION_MODAL);
+                stage.setTitle("USB Database: " + resourceName);
+                stage.setScene(new Scene(tabPane));
+                stage.setWidth(1100);
+                stage.setHeight(800);
+                stage.showAndWait();
             }
         });
     }
@@ -179,5 +227,23 @@ public class MainWindowController extends BaseController implements Initializabl
         var allMeasurements = measurementsHolder.getMeasurementsObservable();
         measurementsChartView.setData(allMeasurements);
         this.measurementsHolder = measurementsHolder;
+    }
+
+    private static class TableDump {
+        final String name;
+        final String content;
+
+        TableDump(String name, String content) {
+            this.name = name;
+            this.content = content;
+        }
+    }
+
+    // CSV escape helper: double quotes inside fields are doubled, and fields containing commas, quotes, or newlines are quoted
+    private static String csvEscape(String s) {
+        if (s == null) return "";
+        boolean needQuote = s.contains(",") || s.contains("\"") || s.contains("\n") || s.contains("\r");
+        String escaped = s.replace("\"", "\"\"");
+        return needQuote ? ("\"" + escaped + "\"") : escaped;
     }
 }
