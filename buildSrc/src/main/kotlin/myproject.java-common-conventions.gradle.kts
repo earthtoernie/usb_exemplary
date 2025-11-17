@@ -35,4 +35,24 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.3")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.11.3")
+    // Provide a test-scoped SLF4J implementation (Logback) for better logging in tests and to avoid warnings
+    testImplementation("ch.qos.logback:logback-classic:1.4.11")
+}
+
+// Copy shared logback-test.xml into each project's test resources so tests use consistent logging
+val sharedLogback = project.rootProject.layout.projectDirectory.file("buildSrc/src/main/resources/logback-test.xml")
+
+subprojects.forEach { sub ->
+    sub.pluginManager.withPlugin("java") {
+        sub.tasks.matching { it.name == "processTestResources" }.configureEach {
+            doFirst {
+                val out = sub.layout.projectDirectory.dir("src/test/resources").asFile
+                out.mkdirs()
+                project.copy {
+                    from(sharedLogback)
+                    into(out)
+                }
+            }
+        }
+    }
 }
