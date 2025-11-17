@@ -27,6 +27,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -129,6 +130,7 @@ public class MainWindowController extends BaseController implements Initializabl
                             StringBuilder sb = new StringBuilder();
                             sb.append("Table: ").append(table).append('\n');
 
+                            int rowCount = 0;
                             try {
                                 // Get column names using a dedicated Statement
                                 List<String> cols = new ArrayList<>();
@@ -147,7 +149,6 @@ public class MainWindowController extends BaseController implements Initializabl
                                 sb.append('\n');
 
                                 // Rows using a dedicated Statement
-                                int rowCount = 0;
                                 try (Statement rowsStmt = conn.createStatement();
                                      ResultSet rows = rowsStmt.executeQuery("SELECT * FROM \"" + table + "\";")) {
                                     while (rows.next()) {
@@ -170,7 +171,36 @@ public class MainWindowController extends BaseController implements Initializabl
                                 sb.append(sw.toString()).append('\n');
                             }
 
-                            dumps.add(new TableDump(table, sb.toString()));
+                            // Lookup vendor name for this table (if it's a vendor table). Try by VID text first, then by numeric id.
+                            String vendorName = "";
+                            try {
+                                if (!"VID_TABLE".equalsIgnoreCase(table)) {
+                                    try (PreparedStatement vendorStmt = conn.prepareStatement("SELECT VENDOR FROM VID_TABLE WHERE VID=?")) {
+                                        vendorStmt.setString(1, table);
+                                        try (ResultSet vr = vendorStmt.executeQuery()) {
+                                            if (vr.next()) {
+                                                vendorName = vr.getString("VENDOR");
+                                            }
+                                        }
+                                    }
+                                    // If not found by VID string, try by numeric id (hex -> int)
+                                    if (vendorName.isEmpty()) {
+                                        try (PreparedStatement vendorStmt2 = conn.prepareStatement("SELECT VENDOR FROM VID_TABLE WHERE id=?")) {
+                                            vendorStmt2.setInt(1, Integer.parseInt(table, 16));
+                                            try (ResultSet vr2 = vendorStmt2.executeQuery()) {
+                                                if (vr2.next()) {
+                                                    vendorName = vr2.getString("VENDOR");
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            } catch (Exception ex) {
+                                // ignore lookup errors - vendorName will remain empty
+                            }
+
+                            // include rowCount and vendorName in the dump so the UI can show vendor next to the row count
+                            dumps.add(new TableDump(table, sb.toString(), rowCount, vendorName));
                         }
                     }
                 } catch (SQLException e) {
@@ -189,7 +219,9 @@ public class MainWindowController extends BaseController implements Initializabl
                 TabPane tabPane = new TabPane();
                 for (TableDump td : dumps) {
                     Tab tab = new Tab();
-                    tab.setText(td.name);
+                    // Title: table name + (N items) + optional vendor name
+                    String title = td.name + " (" + td.rowCount + " items" + (td.vendorName != null && !td.vendorName.isEmpty() ? " - " + td.vendorName : "") + ")";
+                    tab.setText(title);
                     TextArea ta = new TextArea(td.content);
                     ta.setEditable(false);
                     ta.setWrapText(false);
@@ -232,10 +264,14 @@ public class MainWindowController extends BaseController implements Initializabl
     private static class TableDump {
         final String name;
         final String content;
+        final int rowCount;
+        final String vendorName;
 
-        TableDump(String name, String content) {
+        TableDump(String name, String content, int rowCount, String vendorName) {
             this.name = name;
             this.content = content;
+            this.rowCount = rowCount;
+            this.vendorName = vendorName;
         }
     }
 
