@@ -5,6 +5,8 @@ import com.earthtoernie.gui.model.MeasurementsHolder;
 import com.earthtoernie.gui.services.GoTempService;
 import com.earthtoernie.gui.services.RandomWalkService;
 import com.earthtoernie.gui.view.ViewFactory;
+import com.earthtoernie.usbdb.TableDumpInfo;
+import com.earthtoernie.usbdb.UsbDbExplorer;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -20,14 +22,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.net.URL;
-import java.io.StringWriter;
-import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -99,46 +93,23 @@ public class MainWindowController extends BaseController implements Initializabl
         var result = alert.showAndWait();
         result.ifPresent(bt -> {
             if (bt == printBtn) {
-                // Read the sqlite database bundled on the classpath and display its entire contents
-                String resourceName = "usbids.db"; // resource path on the classpath root
-
-                // Use the SQLite classpath resource URL so the packaged DB (in usbDb's resources) is used
-                String jdbcUrl = "jdbc:sqlite::resource:" + resourceName;
                 try {
-                    // Ensure SQLite driver is available at runtime
-                    Class.forName("org.sqlite.JDBC");
-                } catch (ClassNotFoundException e) {
-                    Alert err = new Alert(AlertType.ERROR, "SQLite JDBC driver not found: " + e.getMessage());
-                    err.showAndWait();
-                    return;
+                    List<TableDumpInfo> dumps = new UsbDbExplorer().loadDatabaseDumps();
+                    if (dumps.isEmpty()) {
+                        new Alert(AlertType.INFORMATION, "No tables found in USB database").showAndWait();
+                        return;
+                    }
+                    TabPane tabPane = buildDatabaseTabPane(dumps);
+                    Stage stage = new Stage();
+                    stage.initModality(Modality.APPLICATION_MODAL);
+                    stage.setTitle("USB Database");
+                    stage.setScene(new Scene(tabPane));
+                    stage.setWidth(1100);
+                    stage.setHeight(800);
+                    stage.showAndWait();
+                } catch (Exception e) {
+                    new Alert(AlertType.ERROR, "Error reading USB database: " + e.getMessage()).showAndWait();
                 }
-
-                // Use helper to load database dumps
-                List<TableDump> dumps;
-                try {
-                    dumps = loadDatabaseDumps(jdbcUrl);
-                } catch (SQLException e) {
-                    Alert err = new Alert(AlertType.ERROR, "Error reading database: " + e.getMessage());
-                    err.showAndWait();
-                    return;
-                }
-
-                if (dumps.isEmpty()) {
-                    Alert info = new Alert(AlertType.INFORMATION, "No tables found in resource: " + resourceName);
-                    info.showAndWait();
-                    return;
-                }
-
-                // Build UI via helper and show it
-                TabPane tabPane = buildDatabaseTabPane(dumps);
-
-                Stage stage = new Stage();
-                stage.initModality(Modality.APPLICATION_MODAL);
-                stage.setTitle("USB Database: " + resourceName);
-                stage.setScene(new Scene(tabPane));
-                stage.setWidth(1100);
-                stage.setHeight(800);
-                stage.showAndWait();
             }
         });
     }
@@ -161,101 +132,10 @@ public class MainWindowController extends BaseController implements Initializabl
         this.measurementsHolder = measurementsHolder;
     }
 
-    // Helper that reads the DB and constructs a list of table dumps with row counts and optional vendor names
-    List<TableDump> loadDatabaseDumps(String jdbcUrl) throws SQLException {
-        List<TableDump> dumps = new ArrayList<>();
-        try (Connection conn = DriverManager.getConnection(jdbcUrl)) {
-            try (Statement tablesStmt = conn.createStatement();
-                 ResultSet tables = tablesStmt.executeQuery("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;")) {
-                while (tables.next()) {
-                    String table = tables.getString("name");
-
-                    if (table.startsWith("sqlite_")) {
-                        continue; // skip internal tables
-                    }
-
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Table: ").append(table).append('\n');
-
-                    int rowCount = 0;
-                    try {
-                        // Get column names
-                        List<String> cols = new ArrayList<>();
-                        try (Statement colsStmt = conn.createStatement();
-                             ResultSet colsRs = colsStmt.executeQuery("PRAGMA table_info('" + table + "');")) {
-                            while (colsRs.next()) {
-                                cols.add(colsRs.getString("name"));
-                            }
-                        }
-
-                        // CSV header row
-                        for (int i = 0; i < cols.size(); i++) {
-                            if (i > 0) sb.append(',');
-                            sb.append(csvEscape(cols.get(i)));
-                        }
-                        sb.append('\n');
-
-                        // Rows
-                        try (Statement rowsStmt = conn.createStatement();
-                             ResultSet rows = rowsStmt.executeQuery("SELECT * FROM \"" + table + "\";")) {
-                            while (rows.next()) {
-                                for (int i = 0; i < cols.size(); i++) {
-                                    if (i > 0) sb.append(',');
-                                    String val = rows.getString(cols.get(i));
-                                    sb.append(csvEscape(val));
-                                }
-                                sb.append('\n');
-                                rowCount++;
-                            }
-                        }
-
-                        // Append row count summary
-                        sb.append("# rows: ").append(rowCount).append('\n');
-                    } catch (Exception tableEx) {
-                        sb.append("Error processing table ").append(table).append(": ").append(tableEx.getMessage()).append('\n');
-                        StringWriter sw = new StringWriter();
-                        tableEx.printStackTrace(new PrintWriter(sw));
-                        sb.append(sw).append('\n');
-                    }
-
-                    // Lookup vendor name for this table (if it's a vendor table)
-                    String vendorName = "";
-                    try {
-                        if (!"VID_TABLE".equalsIgnoreCase(table)) {
-                            try (PreparedStatement vendorStmt = conn.prepareStatement("SELECT VENDOR FROM VID_TABLE WHERE VID=?")) {
-                                vendorStmt.setString(1, table);
-                                try (ResultSet vr = vendorStmt.executeQuery()) {
-                                    if (vr.next()) {
-                                        vendorName = vr.getString("VENDOR");
-                                    }
-                                }
-                            }
-                            if (vendorName.isEmpty()) {
-                                try (PreparedStatement vendorStmt2 = conn.prepareStatement("SELECT VENDOR FROM VID_TABLE WHERE id=?")) {
-                                    vendorStmt2.setInt(1, Integer.parseInt(table, 16));
-                                    try (ResultSet vr2 = vendorStmt2.executeQuery()) {
-                                        if (vr2.next()) {
-                                            vendorName = vr2.getString("VENDOR");
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } catch (Exception ignore) {
-                        // leave vendorName empty if lookup fails
-                    }
-
-                    dumps.add(new TableDump(table, sb.toString(), rowCount, vendorName));
-                }
-            }
-        }
-        return dumps;
-    }
-
     // Helper that builds the TabPane UI from table dumps
-    TabPane buildDatabaseTabPane(List<TableDump> dumps) {
+    TabPane buildDatabaseTabPane(List<TableDumpInfo> dumps) {
         TabPane tabPane = new TabPane();
-        for (TableDump td : dumps) {
+        for (TableDumpInfo td : dumps) {
             Tab tab = new Tab();
             tab.setText(buildTabTitle(td));
             TextArea ta = new TextArea(td.content);
@@ -271,7 +151,7 @@ public class MainWindowController extends BaseController implements Initializabl
     }
 
     // Helper that builds a tab title string from a dump (easy to unit test)
-    static String buildTabTitle(TableDump td) {
+    static String buildTabTitle(TableDumpInfo td) {
         return buildTabTitle(td.name, td.rowCount, td.vendorName);
     }
 
@@ -281,25 +161,4 @@ public class MainWindowController extends BaseController implements Initializabl
         return name + " (" + rowCount + " items" + vn + ")";
     }
 
-    private static class TableDump {
-        final String name;
-        final String content;
-        final int rowCount;
-        final String vendorName;
-
-        TableDump(String name, String content, int rowCount, String vendorName) {
-            this.name = name;
-            this.content = content;
-            this.rowCount = rowCount;
-            this.vendorName = vendorName;
-        }
-    }
-
-    // CSV escape helper: double quotes inside fields are doubled, and fields containing commas, quotes, or newlines are quoted
-    private static String csvEscape(String s) {
-        if (s == null) return "";
-        boolean needQuote = s.contains(",") || s.contains("\"") || s.contains("\n") || s.contains("\r");
-        String escaped = s.replace("\"", "\"\"");
-        return needQuote ? ("\"" + escaped + "\"") : escaped;
-    }
 }

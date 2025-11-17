@@ -12,11 +12,11 @@ extraJavaModuleInfo {
     }
 
     // implementation class (was org.usb4java.javax)
-//    module("usb4java-javax-1.3.0.jar", "usb4java.IMPL", "1.3.0"){
-//        requires("javax.usb.API")
-//        requires("native_resources")
-//        exports("org.usb4java.javax")
-//    }
+    module("usb4java-javax-1.3.0.jar", "usb4java.IMPL", "1.3.0"){
+        requires("javax.usb.API")
+        requires("native_resources")
+        exports("org.usb4java.javax")
+    }
 
 }
 
@@ -45,5 +45,5 @@ dependencies {
     implementation(project(":usbMiddle"))
     implementation("javax.usb:usb-api:1.0.2") {isTransitive = false}
 
-//    implementation(project(":usbDb"))
+    implementation(project(":usbDb"))
 }
