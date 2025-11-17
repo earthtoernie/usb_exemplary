@@ -83,3 +83,21 @@ ClassLoader.getSystemResource("org/usb4java/linux_x86_64/libusb4java.so")
 
 how to reset git repo like it was just checked out
 `find . -path ./.git -prune -o -exec rm -rf {} \; 2> /dev/null`
+
+## Shared test logging
+
+This multi-project build provides a single shared `logback-test.xml` that is stored in `buildSrc/src/main/resources` and is automatically added to each subproject's processed test resources (the `processTestResources` output). This ensures consistent test logging configuration across modules without copying files into each `src/test/resources`.
+
+If a subproject needs to override the shared configuration, add your own `src/test/resources/logback-test.xml` in that subproject; Gradle's resource ordering will prefer the module-local resource over the injected shared one.
+
+## Notes
+
+- Test logging: tests use a shared `logback-test.xml` (in test resources) to centralize test log configuration. When running tests locally or in CI the test logger will be applied automatically; to adjust log levels for tests, edit `src/test/resources/logback-test.xml`.
+
+- Optional usb.ids download: The `usbDb` module downloads `usb.ids` from the public linux-usb.org site during the build. To avoid failing builds when that remote resource is unavailable (for example in CI or offline), you can skip the download and DB build with a project property:
+
+```
+./gradlew clean build -PskipUsbDownload=true
+```
+
+When skipped, `usbDb` will log that it skipped building the `usbids.db` file and the rest of the build will proceed normally.

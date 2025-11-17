@@ -64,6 +64,52 @@ subprojects.forEach { sub ->
             (this as? Copy)?.from(sharedLogback)
         }
     }
+
+    // If a subproject applies the Kotlin JVM plugin, align Kotlin's jvmTarget
+    // with the Java toolchain language version to avoid the "Inconsistent JVM-target"
+    // warning emitted by Gradle.
+    sub.pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
+        // Use reflection so buildSrc doesn't need the Kotlin Gradle plugin classes
+        // on its compile classpath. Configure tasks whose name starts with
+        // "compileKotlin" and attempt to call getKotlinOptions().setJvmTarget(...).
+        val spec = object : org.gradle.api.specs.Spec<org.gradle.api.Task> {
+            override fun isSatisfiedBy(t: org.gradle.api.Task): Boolean = t.name.startsWith("compileKotlin")
+        }
+
+        val action = object : org.gradle.api.Action<org.gradle.api.Task> {
+            override fun execute(task: org.gradle.api.Task) {
+                try {
+                    // Determine target JVM string from the subproject's java toolchain if present
+                    val javaToolchainVersion = sub.extensions.findByType(org.gradle.api.plugins.JavaPluginExtension::class.java)
+                        ?.toolchain?.languageVersion?.get()?.toString()
+                        ?: project.java.toolchain.languageVersion.get().toString()
+
+                    val getKotlinOptions = task.javaClass.methods.firstOrNull { it.name == "getKotlinOptions" }
+                    if (getKotlinOptions != null) {
+                        val kotlinOptions = getKotlinOptions.invoke(task)
+                        if (kotlinOptions != null) {
+                            val setJvmTarget = kotlinOptions.javaClass.methods.firstOrNull { it.name == "setJvmTarget" && it.parameterTypes.size == 1 }
+                            if (setJvmTarget != null) {
+                                setJvmTarget.invoke(kotlinOptions, javaToolchainVersion)
+                            } else {
+                                // Some Kotlin plugin versions expose a mutable property 'jvmTarget' instead
+                                val jvmField = kotlinOptions.javaClass.declaredFields.firstOrNull { it.name == "jvmTarget" }
+                                if (jvmField != null) {
+                                    jvmField.isAccessible = true
+                                    jvmField.set(kotlinOptions, javaToolchainVersion)
+                                }
+                            }
+                        }
+                    }
+                } catch (ex: Exception) {
+                    // Don't fail the build if reflection can't set the target; just warn.
+                    logger.warn("Could not align Kotlin jvmTarget for project ${sub.name}: ${ex.message}")
+                }
+            }
+        }
+
+        sub.tasks.matching(spec).configureEach(action)
+    }
 }
 
 // NOTE: There's a benign warning reported by Gradle about inconsistent JVM targets

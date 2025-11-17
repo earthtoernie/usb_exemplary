@@ -1,47 +1,38 @@
-import java.nio.file.Paths
-
 plugins {
     id("myproject.java-library-conventions")
     `java-library`
 }
 
-abstract class DownloadUsbIdFile : DefaultTask() {
+// Allow skipping the external usb.ids download via -PskipUsbDownload=true
+val skipUsbDownload: Boolean = (project.findProperty("skipUsbDownload")?.toString() ?: "false") == "true"
 
-    @get:OutputFile
-    abstract val outputFile: RegularFileProperty
-
-    init {
-        outputFile.convention(project.objects.fileProperty().convention(project.layout.buildDirectory.file("usb.ids")))
-    }
-
-    @TaskAction
-    fun downloadUsbIds() {
+// Register a download task that writes to build/usb.ids. It's only run when not skipping.
+val downloadUsbIdFile = tasks.register("downloadUsbIdFile") {
+    // declare output so Gradle knows about produced file
+    outputs.file(layout.buildDirectory.file("usb.ids"))
+    onlyIf { !skipUsbDownload }
+    doLast {
         val sourceUrl = "http://www.linux-usb.org/usb.ids"
-        val destFile = outputFile.get().asFile
+        val destFile = layout.buildDirectory.file("usb.ids").get().asFile
         ant.invokeMethod("get", mapOf("src" to sourceUrl, "dest" to destFile))
     }
 }
 
-//https://github.com/gradle/kotlin-dsl-samples/blob/master/samples/task-dependencies/build.gradle.kts
-//https://proandroiddev.com/the-new-way-of-writing-build-gradle-with-kotlin-dsl-script-8523710c9670
-val downloadUsbIdFile: TaskProvider<DownloadUsbIdFile> = tasks.register("downloadUsbIdFile", DownloadUsbIdFile::class)
+// Register a task that builds the usbids.db from build/usb.ids, but skip gracefully if the input is absent.
+val buildUsbIdDb = tasks.register("buildUsbIdDb") {
+    dependsOn(downloadUsbIdFile)
+    // declare output
+    outputs.file(layout.projectDirectory.file("src/main/resources/usbids.db"))
 
-abstract class BuildUsbIdDb : DefaultTask() {
-    @get:InputFile
-    abstract val inputFile: RegularFileProperty
+    doLast {
+        val inputFile = layout.buildDirectory.file("usb.ids").get().asFile
+        if (!inputFile.exists()) {
+            logger.lifecycle("Skipping buildUsbIdDb because input usb.ids is not present (skipUsbDownload=$skipUsbDownload)")
+            return@doLast
+        }
 
-    @get:OutputFile
-    abstract val outputFile: RegularFileProperty
-
-    init {
-        inputFile.convention(project.objects.fileProperty().convention(project.layout.buildDirectory.file("usb.ids")))
-        outputFile.convention(project.objects.fileProperty().convention(project.layout.projectDirectory.file("src/main/resources/usbids.db")))
-    }
-
-    @TaskAction
-    fun buildDb() {
-        val destFile = outputFile.get().asFile.toPath()
-        val sourceFile = inputFile.get().asFile.toPath()
+        val destFile = project.file("src/main/resources/usbids.db").toPath()
+        val sourceFile = inputFile.toPath()
 
         val usbDbBuilder = com.earthtoernie.buildsrc.UsbDbBuilder()
         usbDbBuilder.populateDB("jdbc:sqlite:$destFile", sourceFile.toString(), 200, false)
@@ -49,17 +40,14 @@ abstract class BuildUsbIdDb : DefaultTask() {
 }
 
 
-tasks.register("buildUsbIdDb", BuildUsbIdDb::class) {
-    dependsOn(downloadUsbIdFile)
-}
-
+// Ensure resources processing depends on building the DB (which may be a no-op if skipped)
 tasks.processResources {
-    dependsOn("buildUsbIdDb")
+    dependsOn(buildUsbIdDb)
 }
 
-
+// A helper task used previously
 tasks.register("z_countVendors") {
-    dependsOn("z_downloadUsbIdFile")
+    dependsOn(downloadUsbIdFile)
     doLast {
         val usbDbBuilder = com.earthtoernie.buildsrc.UsbDbBuilder()
         val sourceFile = project.layout.buildDirectory.file("usb.ids").get().asFile.toPath()
